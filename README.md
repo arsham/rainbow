@@ -6,6 +6,7 @@
 [![Coverage Status](https://codecov.io/gh/arsham/rainbow/branch/master/graph/badge.svg)](https://codecov.io/gh/arsham/rainbow)
 [![Go Report Card](https://goreportcard.com/badge/github.com/arsham/rainbow)](https://goreportcard.com/report/github.com/arsham/rainbow)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/6cc048fae4ba4129b05226308a0bd7e9)](https://www.codacy.com/app/arsham/rainbow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=arsham/rainbow&amp;utm_campaign=Badge_Grade)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Farsham%2Frainbow.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Farsham%2Frainbow?ref=badge_shield)
 
 Tasty rainbows for your terminal like these:
 
@@ -83,3 +84,6 @@ decided to rewrite it as the library is not maintained anymore.
 
 [figurine]: https://github.com/arsham/figurine
 [glolcat]: https://github.com/cezarsa/glolcat
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Farsham%2Frainbow.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Farsham%2Frainbow?ref=badge_large)
