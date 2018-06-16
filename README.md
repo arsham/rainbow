@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.org/arsham/rainbow.svg?branch=master)](https://travis-ci.org/arsham/rainbow)
 [![Coverage Status](https://codecov.io/gh/arsham/rainbow/branch/master/graph/badge.svg)](https://codecov.io/gh/arsham/rainbow)
 [![Go Report Card](https://goreportcard.com/badge/github.com/arsham/rainbow)](https://goreportcard.com/report/github.com/arsham/rainbow)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6cc048fae4ba4129b05226308a0bd7e9)](https://www.codacy.com/app/arsham/rainbow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=arsham/rainbow&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9d181f84a8ab4ab3a07201e37d9a218b)](https://www.codacy.com/app/arsham/rainbow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=arsham/rainbow&amp;utm_campaign=Badge_Grade)
 
 Tasty rainbows for your terminal like these:
 

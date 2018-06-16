@@ -58,9 +58,13 @@ func (rb *Light) Paint() error {
 }
 
 func (rb *Light) Write(data []byte) (int, error) {
-	var offset int
-	for i := 0; i < len(data); i++ {
-		c := data[i]
+	var skip, offset int
+
+	for i, c := range string(data) {
+		if skip > 0 {
+			skip--
+			continue
+		}
 		switch c {
 		case '\n':
 			offset = 0
@@ -76,7 +80,7 @@ func (rb *Light) Write(data []byte) (int, error) {
 		default:
 			pos := colorMatch.FindIndex(data[i:])
 			if pos != nil {
-				i += pos[1] - 1
+				skip = pos[1] - 1
 				continue
 			}
 			r, g, b := plotPos(float64(rb.Seed) + (float64(offset) / spread))
@@ -85,6 +89,7 @@ func (rb *Light) Write(data []byte) (int, error) {
 			}
 			offset++
 		}
+		skip = 0
 	}
 	return len(data), nil
 }
@@ -96,7 +101,7 @@ func plotPos(x float64) (int, int, int) {
 	return int(red), int(green), int(blue)
 }
 
-func colourise(w io.Writer, c byte, r, g, b int) (int, error) {
+func colourise(w io.Writer, c rune, r, g, b int) (int, error) {
 	return fmt.Fprintf(w, "\033[38;5;%dm%c\033[0m", colour(float64(r), float64(g), float64(b)), c)
 }
 
