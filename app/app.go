@@ -20,23 +20,19 @@ import (
 // Main reads the os.Args and uses everything after the first one as input.
 func Main() {
 	rand.Seed(time.Now().UTC().UnixNano())
-	var (
-		l    *rainbow.Light
-		r    io.Reader
-		seed = int(rand.Int31n(256))
-	)
+	var r io.Reader
 	switch len(os.Args) {
 	case 1:
 		r = os.Stdin
 	default:
 		r = bytes.NewBufferString(strings.Join(os.Args[1:], " ") + "\n")
 	}
-	l = &rainbow.Light{
+	l := &rainbow.Light{
 		Writer: os.Stdout,
-		Reader: r,
-		Seed:   seed,
+		Seed:   int64(rand.Int63n(256)),
 	}
-	if err := l.Paint(); err != nil {
+
+	if _, err := io.Copy(l, r); err != nil {
 		log.Fatal(err)
 	}
 }

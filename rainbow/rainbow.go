@@ -7,32 +7,42 @@
 //
 //   import "github.com/arsham/rainbow/rainbow"
 //   // ...
-//   rb := rainbow.Light{
+//   l := rainbow.Light{
 //       Reader: someReader, // to read from
 //       Writer: os.Stdout, // to write to
 //   }
-//   rb.Paint() // will rainbow everything it reads from reader to writer.
+//   l.Paint() // will rainbow everything it reads from reader to writer.
 //
 // If you want the rainbow to be random, you can seed it this way:
-//   rb := rainbow.Light{
+//   l := rainbow.Light{
 //       Reader: buf,
 //       Writer: os.Stdout,
 //       Seed:   int(rand.Int31n(256)),
 //   }
 //
+// You can also use the Light as a Writer:
+//   l := rainbow.Light{
+//       Writer: os.Stdout, // to write to
+//       Seed:   int(rand.Int31n(256)),
+//   }
+//   io.Copy(l, someReader)
 package rainbow
 
 import (
-	"fmt"
+	"bytes"
 	"io"
 	"math"
 	"math/rand"
 	"regexp"
+	"strconv"
+	"sync/atomic"
+
+	"github.com/arsham/strings"
 )
 
 var (
 	colorMatch = regexp.MustCompile("^\033" + `\[(\d+)(;\d+)?(;\d+)?[m|K]`)
-	tabs       = []byte("        ")
+	tabs       = []byte("\t")
 )
 
 const (
@@ -40,26 +50,27 @@ const (
 	spread = 3
 )
 
-// Light reads from the reader and paints to the writer. You should seed it
-// everytime otherwise you get the same results.
+// Light reads data from the Writer and pains the contents to the Reader. You
+// should seed it everytime otherwise you get the same results.
 type Light struct {
 	io.Reader
 	io.Writer
-	Seed int
+	Seed int64
 }
 
 // Paint returns an error if it could not copy the data.
-func (rb *Light) Paint() error {
-	if rb.Seed == 0 {
-		rb.Seed = int(rand.Int31n(256))
+func (l *Light) Paint() error {
+	if l.Seed == 0 {
+		l.Seed = int64(rand.Int63n(256))
 	}
-	_, err := io.Copy(rb, rb.Reader)
+	_, err := io.Copy(l, l.Reader)
 	return err
 }
 
-func (rb *Light) Write(data []byte) (int, error) {
+// Write paints the data and writes it into l.Writer.
+func (l *Light) Write(data []byte) (int, error) {
 	var skip, offset int
-
+	buf := new(bytes.Buffer)
 	for i, c := range string(data) {
 		if skip > 0 {
 			skip--
@@ -68,30 +79,26 @@ func (rb *Light) Write(data []byte) (int, error) {
 		switch c {
 		case '\n':
 			offset = 0
-			rb.Seed++
-			if _, err := rb.Writer.Write([]byte{'\n'}); err != nil {
-				return 0, err
-			}
+			atomic.AddInt64(&l.Seed, 1)
+			buf.Write([]byte{'\n'})
 		case '\t':
 			offset += len(tabs)
-			if _, err := rb.Writer.Write(tabs); err != nil {
-				return 0, err
-			}
+			buf.Write(tabs)
 		default:
 			pos := colorMatch.FindIndex(data[i:])
 			if pos != nil {
 				skip = pos[1] - 1
 				continue
 			}
-			r, g, b := plotPos(float64(rb.Seed) + (float64(offset) / spread))
-			if _, err := colourise(rb.Writer, c, r, g, b); err != nil {
-				return 0, err
-			}
+			r, g, b := plotPos(float64(atomic.LoadInt64(&l.Seed)) + (float64(offset) / spread))
+			w := colourise(c, r, g, b)
+			buf.Write(w.Bytes())
 			offset++
 		}
 		skip = 0
 	}
-	return len(data), nil
+	_, err := l.Writer.Write(buf.Bytes())
+	return len(data), err
 }
 
 func plotPos(x float64) (int, int, int) {
@@ -101,14 +108,20 @@ func plotPos(x float64) (int, int, int) {
 	return int(red), int(green), int(blue)
 }
 
-func colourise(w io.Writer, c rune, r, g, b int) (int, error) {
-	return fmt.Fprintf(w, "\033[38;5;%dm%c\033[0m", colour(float64(r), float64(g), float64(b)), c)
+func colourise(c rune, r, g, b int) *strings.Builder {
+	s := new(strings.Builder)
+	s.WriteString("\033[38;5;")
+	s.WriteBytes(strconv.AppendInt(nil, colour(float64(r), float64(g), float64(b)), 10))
+	s.WriteRune('m')
+	s.WriteRune(c)
+	s.WriteString("\033[0m")
+	return s
 }
 
-func colour(red, green, blue float64) int {
+func colour(red, green, blue float64) int64 {
 	return 16 + baseColor(red, 36) + baseColor(green, 6) + baseColor(blue, 1)
 }
 
-func baseColor(value float64, factor int) int {
-	return int(6*value/256) * factor
+func baseColor(value float64, factor int64) int64 {
+	return int64(6*value/256) * factor
 }

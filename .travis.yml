@@ -7,6 +7,7 @@ go:
   - 1.8.x
   - 1.9.x
   - 1.10.x
+  - 1.11.x
   - tip
 
 matrix:
@@ -17,9 +18,11 @@ services:
   - docker
 
 install:
+  - go get github.com/Masterminds/glide
   - go get github.com/schrej/godacov
 
 script:
+  - glide install
   - ./coverage.sh
 
 after_success:

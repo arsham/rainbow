@@ -7,10 +7,13 @@ package rainbow
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"regexp"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -31,7 +34,7 @@ func readFile(name string) ([]byte, error) {
 	return b, nil
 }
 
-func TestRainbow_Paint(t *testing.T) {
+func TestLightPaint(t *testing.T) {
 	t.Parallel()
 	plain, err := readFile("plain.txt")
 	if err != nil {
@@ -66,18 +69,78 @@ func TestRainbow_Paint(t *testing.T) {
 	for _, tc := range tcs {
 		r := bytes.NewReader(tc.sample)
 		w := new(bytes.Buffer)
-		rb := &Light{
+		l := &Light{
 			Reader: r,
 			Writer: w,
 			Seed:   1,
 		}
-		err := rb.Paint()
+		err := l.Paint()
 		if err != nil {
-			t.Errorf("rb.Paint() = %v, want nil", err)
+			t.Errorf("l.Paint() = %v, want nil", err)
 		}
 		if w.String() != string(tc.painted) {
 			t.Errorf("w.String() = (%s), want (%s)", w.String(), string(tc.painted))
 		}
+	}
+}
+
+func BenchmarkLightPaint(b *testing.B) {
+	bcs := []struct {
+		lines   int
+		letters int
+	}{
+		{1, 1000},
+		{1, 10000},
+		{1, 100000},
+		{10, 1000},
+		{10, 10000},
+		{10, 100000},
+		{50, 1000},
+		{50, 10000},
+		{100, 1000},
+		{100, 10000},
+		{1000, 1000},
+		{1000, 10000},
+	}
+	for _, bc := range bcs {
+		var (
+			totalLen int
+			name     = fmt.Sprintf("lines%d_let%d", bc.lines, bc.letters)
+			line     = make([]byte, bc.letters)
+			r        = new(bytes.Buffer)
+			w        = new(bytes.Buffer)
+		)
+		rand.Read(line)
+		for i := 0; i < bc.lines; i++ {
+			r.Write(line)
+			r.Write([]byte("\n"))
+			totalLen += len(line) + 1
+		}
+		b.Run(name, func(b *testing.B) {
+			b.ResetTimer()
+			b.Run("Serial", func(b *testing.B) {
+				l := &Light{
+					Writer: w,
+					Reader: r,
+					Seed:   1,
+				}
+				for i := 0; i < b.N; i++ {
+					l.Paint()
+				}
+			})
+			b.Run("Parallel", func(b *testing.B) {
+				b.RunParallel(func(bp *testing.PB) {
+					l := &Light{
+						Writer: w,
+						Reader: r,
+						Seed:   1,
+					}
+					for bp.Next() {
+						l.Paint()
+					}
+				})
+			})
+		})
 	}
 }
 
@@ -114,6 +177,21 @@ func TestPlotPos(t *testing.T) {
 	}
 }
 
+var got, got1, got2 int
+
+func BenchmarkPlotPos(b *testing.B) {
+	b.Run("Serial", func(b *testing.B) {
+		got, got1, got2 = plotPos(100)
+	})
+	b.Run("Parallel", func(b *testing.B) {
+		b.RunParallel(func(b *testing.PB) {
+			for b.Next() {
+				got, got1, got2 = plotPos(100)
+			}
+		})
+	})
+}
+
 // this test is here for keeping the logic in sync when we refactor the codes.
 func TestColour(t *testing.T) {
 	t.Parallel()
@@ -123,8 +201,8 @@ func TestColour(t *testing.T) {
 	bc := func(value float64, factor int) int {
 		return int(6*value/256) * factor
 	}
-	check := func(red, green, blue float64) int {
-		return 16 + bc(red, 36) + bc(green, 6) + bc(blue, 1)
+	check := func(red, green, blue float64) int64 {
+		return int64(16 + bc(red, 36) + bc(green, 6) + bc(blue, 1))
 	}
 	for i := 0; i < 1000; i++ {
 		red, green, blue := float64(randColour()), float64(randColour()), float64(randColour())
@@ -136,65 +214,26 @@ func TestColour(t *testing.T) {
 	}
 }
 
-func BenchmarkRainbowPaint(b *testing.B) {
-	bcs := []struct {
-		name    string
-		letters int
-		lines   int
-	}{
-		{"1_20", 20, 1},
-		{"1_100", 100, 1},
-		{"1_500", 500, 1},
-		{"1_1000", 1000, 1},
-		{"10_20", 20, 10},
-		{"10_100", 100, 10},
-		{"10_500", 500, 10},
-		{"10_1000", 1000, 10},
-		{"20_20", 20, 20},
-		{"20_100", 100, 20},
-		{"20_500", 500, 20},
-		{"20_1000", 1000, 20},
-		{"60_20", 20, 60},
-		{"60_100", 100, 60},
-		{"60_500", 500, 60},
-		{"60_1000", 1000, 60},
-		{"100_20", 20, 100},
-		{"100_100", 100, 100},
-		{"100_500", 500, 100},
-		{"100_1000", 1000, 100},
-		{"200_20", 20, 200},
-		{"200_100", 100, 200},
-		{"200_500", 500, 200},
-		{"200_1000", 1000, 200},
-	}
-	for _, bc := range bcs {
-		b.Run(bc.name, func(b *testing.B) {
-			w := new(bytes.Buffer)
-			line := make([]byte, bc.letters)
-			r := new(bytes.Buffer)
-			rand.Read(line)
-			for i := 0; i < bc.lines; i++ {
-				r.Write(line)
-				r.Write([]byte("\n"))
-			}
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				rb := &Light{
-					Reader: r,
-					Writer: w,
-				}
-				rb.Paint()
-				w.String()
+func BenchmarkColour(b *testing.B) {
+	b.Run("Serial", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			colour(float64(0), float64(100), float64(1000))
+		}
+	})
+	b.Run("Parallel", func(b *testing.B) {
+		b.RunParallel(func(b *testing.PB) {
+			for b.Next() {
+				colour(float64(0), float64(100), float64(1000))
 			}
 		})
-	}
+	})
 }
 
 type writeError func([]byte) (int, error)
 
 func (w *writeError) Write(p []byte) (int, error) { return (*w)(p) }
 
-func TestRainbow_Write(t *testing.T) {
+func TestLightWrite(t *testing.T) {
 	errExam := errors.New("this error")
 	wrErr := writeError(func([]byte) (int, error) { return 0, errExam })
 	tcs := []struct {
@@ -217,13 +256,13 @@ func TestRainbow_Write(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			rb := &Light{
+			l := &Light{
 				Writer: tc.writer,
 				Seed:   1,
 			}
-			_, err := rb.Write(tc.data)
+			_, err := l.Write(tc.data)
 			if err != nil {
-				t.Errorf("rb.Write(data): err = %v, want nil", err)
+				t.Errorf("l.Write(data): err = %v, want nil", err)
 			}
 			got := tc.writer.Bytes()
 			if !bytes.Equal(got, tc.want) {
@@ -232,17 +271,94 @@ func TestRainbow_Write(t *testing.T) {
 			if !tc.checkErr {
 				return
 			}
-			rb.Writer = &wrErr
-			_, err = rb.Write(tc.data)
+			l.Writer = &wrErr
+			_, err = l.Write(tc.data)
 			if err == nil {
-				t.Errorf("rb.Write(data): err = nil, want %v", errExam)
+				t.Errorf("l.Write(data): err = nil, want %v", errExam)
 			}
 		})
 	}
 }
 
+func TestLightWriteRace(t *testing.T) {
+	var (
+		wg    sync.WaitGroup
+		count = 1000
+		data  = bytes.Repeat([]byte("abc def\n"), 10)
+		l     = &Light{
+			Writer: ioutil.Discard,
+			Seed:   1,
+		}
+	)
+	wg.Add(3)
+	go func() {
+		for i := 0; i < count; i++ {
+			l.Write(data)
+		}
+		wg.Done()
+	}()
+	go func() {
+		for i := 0; i < count; i++ {
+			l.Write(data)
+		}
+		wg.Done()
+	}()
+	go func() {
+		for i := 0; i < count; i++ {
+			l.Write(data)
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+}
+
+func BenchmarkLightWrite(b *testing.B) {
+	bcs := []struct {
+		line   int
+		length int
+		data   string
+	}{
+		{1, 1, "\n"},
+		{5, 10, strings.Repeat("aaaaa\n", 10)},
+		{15, 100, strings.Repeat("aaaaabbbbbccccc\n", 100)},
+		{15, 1000, strings.Repeat("aaaaabbbbbccccc\n", 1000)},
+		{100, 1000, strings.Repeat(strings.Repeat("a", 100)+"\n", 1000)},
+		{500, 1000, strings.Repeat(strings.Repeat("a", 500)+"\n", 1000)},
+		{1000, 1000, strings.Repeat(strings.Repeat("a", 1000)+"\n", 1000)},
+	}
+	b.ResetTimer()
+	b.Run("Serial", func(b *testing.B) {
+		for _, bc := range bcs {
+			l := &Light{
+				Writer: ioutil.Discard,
+				Seed:   1,
+			}
+			name := fmt.Sprintf("line%d_len%d", bc.line, bc.length)
+			b.Run(name, func(b *testing.B) {
+				l.Write([]byte(bc.data))
+			})
+		}
+	})
+	b.Run("Parallel", func(b *testing.B) {
+		for _, bc := range bcs {
+			l := &Light{
+				Writer: ioutil.Discard,
+				Seed:   1,
+			}
+			name := fmt.Sprintf("line%d_len%d", bc.line, bc.length)
+			b.Run(name, func(b *testing.B) {
+				b.RunParallel(func(b *testing.PB) {
+					for b.Next() {
+						l.Write([]byte(bc.data))
+					}
+				})
+			})
+		}
+	})
+}
+
 // making sure we are not altering any texts
-func TestRainbow_WriteRevert(t *testing.T) {
+func TestLightWriteRevert(t *testing.T) {
 	re := regexp.MustCompile(`\x1B\[[0-9;]*[JKmsu]`)
 	tcs := []string{
 		"u9VGCQ1E4KCr8bO8 3ULdtlHL3WsjulJU kqUneSFT6 tvyAfih1Qew 5wBKffL4Yc",
