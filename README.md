@@ -55,20 +55,29 @@ $ ls -l | rainbow
 ```go
 import "github.com/arsham/rainbow/rainbow"
 // ...
-rb := rainbow.Light{
+l := rainbow.Light{
     Reader: someReader, // to read from
     Writer: os.Stdout, // to write to
 }
-rb.Paint() // will rainbow everything it reads from reader to writer.
+l.Paint() // will rainbow everything it reads from reader to writer.
 ```
 If you want the rainbow to be random, you can seed it this way:
 
 ```go
-rb := rainbow.Light{
+l := rainbow.Light{
     Reader: buf,
     Writer: os.Stdout,
-    Seed:   int(rand.Int31n(256)),
+    Seed:   int64(rand.Int63n(256)),
 }
+```
+Or if you prefer io.Copy:
+
+```go
+l := rainbow.Light{
+    Writer: os.Stdout,
+    Seed:   int64(rand.Int63n(256)),
+}
+io.Copy(l, someReader)
 ```
 
 ## See Also
