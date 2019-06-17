@@ -1,6 +1,0 @@
-hash: 8a3dd620534f6eddc991d6085be8a87c09c409e2121e1b8d045ed8f58fbe8b9b
-updated: 2018-10-15T22:59:01.056734695+01:00
-imports:
-- name: github.com/arsham/strings
-  version: d1b453ead28db17f0af10a311818a8e03c14387e
-testImports: []

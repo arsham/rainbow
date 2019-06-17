@@ -1,3 +1,0 @@
-package: github.com/arsham/rainbow
-import:
-- package: github.com/arsham/strings

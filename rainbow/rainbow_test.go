@@ -68,7 +68,7 @@ func TestLightPaint(t *testing.T) {
 
 	for _, tc := range tcs {
 		r := bytes.NewReader(tc.sample)
-		w := new(bytes.Buffer)
+		w := &bytes.Buffer{}
 		l := &Light{
 			Reader: r,
 			Writer: w,
@@ -107,8 +107,8 @@ func BenchmarkLightPaint(b *testing.B) {
 			totalLen int
 			name     = fmt.Sprintf("lines%d_let%d", bc.lines, bc.letters)
 			line     = make([]byte, bc.letters)
-			r        = new(bytes.Buffer)
-			w        = new(bytes.Buffer)
+			r        = &bytes.Buffer{}
+			w        = &bytes.Buffer{}
 		)
 		rand.Read(line)
 		for i := 0; i < bc.lines; i++ {
@@ -243,16 +243,16 @@ func TestLightWrite(t *testing.T) {
 		want     []byte
 		checkErr bool
 	}{
-		{"new line", new(bytes.Buffer), []byte("\n"), []byte("\n"), true},
-		{"tab", new(bytes.Buffer), []byte("\t"), tabs, true},
-		{"NL tab", new(bytes.Buffer), []byte("\n\t"), append([]byte("\n"), tabs...), true},
-		{"tab NL", new(bytes.Buffer), []byte("\t\n"), append(tabs, byte('\n')), true},
-		{`033[38;5;2m`, new(bytes.Buffer), []byte("\033[38;5;2m"), []byte(""), false},
-		{`033[38;5;2K`, new(bytes.Buffer), []byte("\033[38;5;2K"), []byte(""), false},
-		{`033[32K`, new(bytes.Buffer), []byte("\033[32K"), []byte(""), false},
-		{`033[3K`, new(bytes.Buffer), []byte("\033[3K"), []byte(""), false},
-		{`033[3KARSHAM bytes`, new(bytes.Buffer), []byte("\033[3KARSHAM"), []byte{27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 82, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 83, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 72, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 77, 27, 91, 48, 109}, true},
-		{`033[3KARSHAM string`, new(bytes.Buffer), []byte("\033[3KARSHAM"), []byte("[38;5;154mA[0m[38;5;154mR[0m[38;5;154mS[0m[38;5;154mH[0m[38;5;154mA[0m[38;5;154mM[0m"), true},
+		{"new line", &bytes.Buffer{}, []byte("\n"), []byte("\n"), true},
+		{"tab", &bytes.Buffer{}, []byte("\t"), tabs, true},
+		{"NL tab", &bytes.Buffer{}, []byte("\n\t"), append([]byte("\n"), tabs...), true},
+		{"tab NL", &bytes.Buffer{}, []byte("\t\n"), append(tabs, byte('\n')), true},
+		{`033[38;5;2m`, &bytes.Buffer{}, []byte("\033[38;5;2m"), []byte(""), false},
+		{`033[38;5;2K`, &bytes.Buffer{}, []byte("\033[38;5;2K"), []byte(""), false},
+		{`033[32K`, &bytes.Buffer{}, []byte("\033[32K"), []byte(""), false},
+		{`033[3K`, &bytes.Buffer{}, []byte("\033[3K"), []byte(""), false},
+		{`033[3KARSHAM bytes`, &bytes.Buffer{}, []byte("\033[3KARSHAM"), []byte{27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 82, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 83, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 72, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 77, 27, 91, 48, 109}, true},
+		{`033[3KARSHAM string`, &bytes.Buffer{}, []byte("\033[3KARSHAM"), []byte("[38;5;154mA[0m[38;5;154mR[0m[38;5;154mS[0m[38;5;154mH[0m[38;5;154mA[0m[38;5;154mM[0m"), true},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
@@ -277,6 +277,17 @@ func TestLightWrite(t *testing.T) {
 				t.Errorf("l.Write(data): err = nil, want %v", errExam)
 			}
 		})
+	}
+	r := &bytes.Buffer{}
+	l := &Light{
+		Reader: r,
+	}
+	n, err := l.Write([]byte("blah"))
+	if err == nil {
+		t.Error("l.Write(data): err = nil, want error")
+	}
+	if n != 0 {
+		t.Errorf("l.Write(data): n = %d, want 0", n)
 	}
 }
 
@@ -384,7 +395,7 @@ func TestLightWriteRevert(t *testing.T) {
 		"GNIzszrfT5 8WBHpE00a5j7Srfnx e8Qrrhomy8tw7XIa kQFG7ZazYio x5z PZIQ",
 	}
 	for _, tc := range tcs {
-		w := new(bytes.Buffer)
+		w := &bytes.Buffer{}
 		r := bytes.NewReader([]byte(tc))
 		l := Light{
 			Reader: r,

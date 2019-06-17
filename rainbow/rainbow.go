@@ -30,6 +30,7 @@ package rainbow
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"math"
 	"math/rand"
@@ -43,6 +44,8 @@ import (
 var (
 	colorMatch = regexp.MustCompile("^\033" + `\[(\d+)(;\d+)?(;\d+)?[m|K]`)
 	tabs       = []byte("\t")
+	// ErrNilWriter is returned when Light.Writer is nil.
+	ErrNilWriter = errors.New("nil writer")
 )
 
 const (
@@ -53,15 +56,15 @@ const (
 // Light reads data from the Writer and pains the contents to the Reader. You
 // should seed it everytime otherwise you get the same results.
 type Light struct {
-	io.Reader
-	io.Writer
-	Seed int64
+	Reader io.Reader
+	Writer io.Writer
+	Seed   int64
 }
 
 // Paint returns an error if it could not copy the data.
 func (l *Light) Paint() error {
 	if l.Seed == 0 {
-		l.Seed = int64(rand.Int63n(256))
+		l.Seed = rand.Int63n(256)
 	}
 	_, err := io.Copy(l, l.Reader)
 	return err
@@ -70,7 +73,10 @@ func (l *Light) Paint() error {
 // Write paints the data and writes it into l.Writer.
 func (l *Light) Write(data []byte) (int, error) {
 	var skip, offset int
-	buf := new(bytes.Buffer)
+	if l.Writer == nil {
+		return 0, ErrNilWriter
+	}
+	buf := &bytes.Buffer{}
 	for i, c := range string(data) {
 		if skip > 0 {
 			skip--
@@ -80,7 +86,7 @@ func (l *Light) Write(data []byte) (int, error) {
 		case '\n':
 			offset = 0
 			atomic.AddInt64(&l.Seed, 1)
-			buf.Write([]byte{'\n'})
+			buf.WriteByte('\n')
 		case '\t':
 			offset += len(tabs)
 			buf.Write(tabs)
@@ -109,7 +115,7 @@ func plotPos(x float64) (int, int, int) {
 }
 
 func colourise(c rune, r, g, b int) *strings.Builder {
-	s := new(strings.Builder)
+	s := &strings.Builder{}
 	s.WriteString("\033[38;5;")
 	s.WriteBytes(strconv.AppendInt(nil, colour(float64(r), float64(g), float64(b)), 10))
 	s.WriteRune('m')
