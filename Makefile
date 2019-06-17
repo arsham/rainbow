@@ -20,25 +20,25 @@ tmpfolder:
 .PHONY: linux
 linux: tmpfolder
 	@GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o $(DEPLOY_FOLDER)/$(RELEADE_NAME) main.go
-	@tar -czf $(DEPLOY_FOLDER)/figurine_linux_$(TARGET).tar.gz $(DEPLOY_FOLDER)/$(RELEADE_NAME)
-	@cd $(DEPLOY_FOLDER) ; sha256sum figurine_linux_$(TARGET).tar.gz >> $(CHECKSUM_FILE)
-	@echo "Linux target:" $(DEPLOY_FOLDER)/figurine_linux_$(TARGET).tar.gz
+	@tar -czf $(DEPLOY_FOLDER)/$(RELEADE_NAME)_linux_$(TARGET).tar.gz $(DEPLOY_FOLDER)/$(RELEADE_NAME)
+	@cd $(DEPLOY_FOLDER) ; sha256sum $(RELEADE_NAME)_linux_$(TARGET).tar.gz >> $(CHECKSUM_FILE)
+	@echo "Linux target:" $(DEPLOY_FOLDER)/$(RELEADE_NAME)_linux_$(TARGET).tar.gz
 	@rm $(DEPLOY_FOLDER)/$(RELEADE_NAME)
 
 .PHONY: darwin
 darwin: tmpfolder
 	@GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o $(DEPLOY_FOLDER)/$(RELEADE_NAME) main.go
-	@tar -czf $(DEPLOY_FOLDER)/figurine_darwin_$(TARGET).tar.gz $(DEPLOY_FOLDER)/$(RELEADE_NAME)
-	@cd $(DEPLOY_FOLDER) ; sha256sum figurine_darwin_$(TARGET).tar.gz >> $(CHECKSUM_FILE)
-	@echo "Darwin target:" $(DEPLOY_FOLDER)/figurine_darwin_$(TARGET).tar.gz
+	@tar -czf $(DEPLOY_FOLDER)/$(RELEADE_NAME)_darwin_$(TARGET).tar.gz $(DEPLOY_FOLDER)/$(RELEADE_NAME)
+	@cd $(DEPLOY_FOLDER) ; sha256sum $(RELEADE_NAME)_darwin_$(TARGET).tar.gz >> $(CHECKSUM_FILE)
+	@echo "Darwin target:" $(DEPLOY_FOLDER)/$(RELEADE_NAME)_darwin_$(TARGET).tar.gz
 	@rm $(DEPLOY_FOLDER)/$(RELEADE_NAME)
 
 .PHONY: windows
 windows: tmpfolder
 	@GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o $(DEPLOY_FOLDER)/$(RELEADE_NAME).exe main.go
-	@zip -r $(DEPLOY_FOLDER)/figurine_windows_$(TARGET).zip $(DEPLOY_FOLDER)/$(RELEADE_NAME).exe
-	@cd $(DEPLOY_FOLDER) ; sha256sum figurine_windows_$(TARGET).zip >> $(CHECKSUM_FILE)
-	@echo "Darwin target:" $(DEPLOY_FOLDER)/figurine_windows_$(TARGET).zip
+	@zip -r $(DEPLOY_FOLDER)/$(RELEADE_NAME)_windows_$(TARGET).zip $(DEPLOY_FOLDER)/$(RELEADE_NAME).exe
+	@cd $(DEPLOY_FOLDER) ; sha256sum $(RELEADE_NAME)_windows_$(TARGET).zip >> $(CHECKSUM_FILE)
+	@echo "Darwin target:" $(DEPLOY_FOLDER)/$(RELEADE_NAME)_windows_$(TARGET).zip
 	@rm $(DEPLOY_FOLDER)/$(RELEADE_NAME).exe
 
 .PHONY: release
