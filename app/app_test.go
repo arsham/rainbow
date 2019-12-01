@@ -12,22 +12,23 @@ import (
 	"testing"
 
 	"github.com/arsham/rainbow/app"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var re = regexp.MustCompile(`\x1B\[[0-9;]*[JKmsu]`)
 
 func setup(t *testing.T) func() {
+	t.Helper()
 	oldStdin := os.Stdin
 	oldStdout := os.Stdout
 	oldArgs := os.Args
 
 	fin, err := ioutil.TempFile("", "testMain")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	fout, err := ioutil.TempFile("", "testMain")
 	if err != nil {
-		fin.Close()
+		assert.NoError(t, fin.Close())
 		t.Fatal(err)
 	}
 	os.Stdin = fin
@@ -36,10 +37,10 @@ func setup(t *testing.T) func() {
 		os.Stdin = oldStdin
 		os.Stdout = oldStdout
 		os.Args = oldArgs
-		fin.Close()
-		fout.Close()
-		os.Remove(fin.Name())
-		os.Remove(fout.Name())
+		assert.NoError(t, fin.Close())
+		assert.NoError(t, fout.Close())
+		assert.NoError(t, os.Remove(fin.Name()))
+		assert.NoError(t, os.Remove(fout.Name()))
 	}
 }
 
@@ -55,9 +56,7 @@ func TestMainArg(t *testing.T) {
 
 	out := buf.Bytes()
 	got := re.ReplaceAll(out, []byte(""))
-	if !bytes.Equal(got, []byte(input+"\n")) {
-		t.Errorf("want %v = %v", got, []byte(input+"\n"))
-	}
+	assert.Equal(t, []byte(input+"\n"), got)
 }
 
 func TestMainPipe(t *testing.T) {
@@ -74,7 +73,5 @@ func TestMainPipe(t *testing.T) {
 
 	out := buf.Bytes()
 	got := re.ReplaceAll(out, []byte(""))
-	if !bytes.Equal(got, []byte(input)) {
-		t.Errorf("want (%s) = (%s)", string(got), input)
-	}
+	assert.Equal(t, []byte(input), got)
 }

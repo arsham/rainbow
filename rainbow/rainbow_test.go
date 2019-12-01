@@ -16,34 +16,27 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
-func readFile(name string) ([]byte, error) {
+func readFile(t *testing.T, name string) []byte {
 	f, err := os.Open("testdata/" + name)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(t, err)
 	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
-	return b, nil
+	require.NoError(t, err)
+	return b
 }
 
 func TestLightPaint(t *testing.T) {
 	t.Parallel()
-	plain, err := readFile("plain.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	painted, err := readFile("painted.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
+	plain := readFile(t, "plain.txt")
+	painted := readFile(t, "painted.txt")
 	tcs := []struct {
 		sample  []byte
 		painted []byte
@@ -75,12 +68,8 @@ func TestLightPaint(t *testing.T) {
 			Seed:   1,
 		}
 		err := l.Paint()
-		if err != nil {
-			t.Errorf("l.Paint() = %v, want nil", err)
-		}
-		if w.String() != string(tc.painted) {
-			t.Errorf("w.String() = (%s), want (%s)", w.String(), string(tc.painted))
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, tc.painted, w.String())
 	}
 }
 
@@ -164,15 +153,9 @@ func TestPlotPos(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			got, got1, got2 := plotPos(tc.x)
-			if got != tc.red {
-				t.Errorf("plotPos() red = %v, want %v", got, tc.red)
-			}
-			if got1 != tc.green {
-				t.Errorf("plotPos() green = %v, want %v", got1, tc.green)
-			}
-			if got2 != tc.blue {
-				t.Errorf("plotPos() blue = %v, want %v", got2, tc.blue)
-			}
+			assert.Equal(t, tc.red, got, "red value")
+			assert.Equal(t, tc.green, got1, "green value")
+			assert.Equal(t, tc.blue, got2, " blue value")
 		})
 	}
 }
@@ -208,9 +191,7 @@ func TestColour(t *testing.T) {
 		red, green, blue := float64(randColour()), float64(randColour()), float64(randColour())
 		got := colour(red, green, blue)
 		want := check(red, green, blue)
-		if got != want {
-			t.Errorf("colour(%f, %f, %f) = %d, want %d", red, green, blue, got, want)
-		}
+		assert.Equalf(t, want, got, "colour(%f, %f, %f)", red, green, blue)
 	}
 }
 
@@ -236,34 +217,31 @@ func (w *writeError) Write(p []byte) (int, error) { return (*w)(p) }
 func TestLightWrite(t *testing.T) {
 	errExam := errors.New("this error")
 	wrErr := writeError(func([]byte) (int, error) { return 0, errExam })
-	tcs := []struct {
-		name     string
+	tcs := map[string]struct {
 		writer   *bytes.Buffer
 		data     []byte
 		want     []byte
 		checkErr bool
 	}{
-		{"new line", &bytes.Buffer{}, []byte("\n"), []byte("\n"), true},
-		{"tab", &bytes.Buffer{}, []byte("\t"), tabs, true},
-		{"NL tab", &bytes.Buffer{}, []byte("\n\t"), append([]byte("\n"), tabs...), true},
-		{"tab NL", &bytes.Buffer{}, []byte("\t\n"), append(tabs, byte('\n')), true},
-		{`033[38;5;2m`, &bytes.Buffer{}, []byte("\033[38;5;2m"), []byte(""), false},
-		{`033[38;5;2K`, &bytes.Buffer{}, []byte("\033[38;5;2K"), []byte(""), false},
-		{`033[32K`, &bytes.Buffer{}, []byte("\033[32K"), []byte(""), false},
-		{`033[3K`, &bytes.Buffer{}, []byte("\033[3K"), []byte(""), false},
-		{`033[3KARSHAM bytes`, &bytes.Buffer{}, []byte("\033[3KARSHAM"), []byte{27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 82, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 83, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 72, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 77, 27, 91, 48, 109}, true},
-		{`033[3KARSHAM string`, &bytes.Buffer{}, []byte("\033[3KARSHAM"), []byte("[38;5;154mA[0m[38;5;154mR[0m[38;5;154mS[0m[38;5;154mH[0m[38;5;154mA[0m[38;5;154mM[0m"), true},
+		"new line":           {&bytes.Buffer{}, []byte("\n"), []byte("\n"), true},
+		"tab":                {&bytes.Buffer{}, []byte("\t"), tabs, true},
+		"NL tab":             {&bytes.Buffer{}, []byte("\n\t"), append([]byte("\n"), tabs...), true},
+		"tab NL":             {&bytes.Buffer{}, []byte("\t\n"), append(tabs, byte('\n')), true},
+		`033[38;5;2m`:        {&bytes.Buffer{}, []byte("\033[38;5;2m"), []byte(""), false},
+		`033[38;5;2K`:        {&bytes.Buffer{}, []byte("\033[38;5;2K"), []byte(""), false},
+		`033[32K`:            {&bytes.Buffer{}, []byte("\033[32K"), []byte(""), false},
+		`033[3K`:             {&bytes.Buffer{}, []byte("\033[3K"), []byte(""), false},
+		`033[3KARSHAM bytes`: {&bytes.Buffer{}, []byte("\033[3KARSHAM"), []byte{27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 82, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 83, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 72, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 77, 27, 91, 48, 109}, true},
+		`033[3KARSHAM string`: {&bytes.Buffer{}, []byte("\033[3KARSHAM"), []byte("[38;5;154mA[0m[38;5;154mR[0m[38;5;154mS[0m[38;5;154mH[0m[38;5;154mA[0m[38;5;154mM[0m"), true},
 	}
-	for _, tc := range tcs {
-		t.Run(tc.name, func(t *testing.T) {
+	for name, tc := range tcs {
+		t.Run(name, func(t *testing.T) {
 			l := &Light{
 				Writer: tc.writer,
 				Seed:   1,
 			}
 			_, err := l.Write(tc.data)
-			if err != nil {
-				t.Errorf("l.Write(data): err = %v, want nil", err)
-			}
+			assert.NoError(t, err)
 			got := tc.writer.Bytes()
 			if !bytes.Equal(got, tc.want) {
 				t.Errorf("got (%v), want (%v)", got, tc.want)
@@ -273,9 +251,7 @@ func TestLightWrite(t *testing.T) {
 			}
 			l.Writer = &wrErr
 			_, err = l.Write(tc.data)
-			if err == nil {
-				t.Errorf("l.Write(data): err = nil, want %v", errExam)
-			}
+			assert.Error(t, err)
 		})
 	}
 	r := &bytes.Buffer{}
@@ -283,12 +259,8 @@ func TestLightWrite(t *testing.T) {
 		Reader: r,
 	}
 	n, err := l.Write([]byte("blah"))
-	if err == nil {
-		t.Error("l.Write(data): err = nil, want error")
-	}
-	if n != 0 {
-		t.Errorf("l.Write(data): n = %d, want 0", n)
-	}
+	assert.Error(t, err)
+	assert.Zero(t, n)
 }
 
 func TestLightWriteRace(t *testing.T) {
@@ -401,13 +373,10 @@ func TestLightWriteRevert(t *testing.T) {
 			Reader: r,
 			Writer: w,
 		}
-		if err := l.Paint(); err != nil {
-			t.Fatal(err)
-		}
+		err := l.Paint()
+		require.NoError(t, err)
 
 		got := re.ReplaceAll(w.Bytes(), []byte(""))
-		if !bytes.Equal(got, []byte(tc)) {
-			t.Errorf("got = \n(%s), want \n(%s)", string(got), tc)
-		}
+		assert.EqualValues(t, tc, got)
 	}
 }

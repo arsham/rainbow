@@ -9,8 +9,19 @@ install:
 
 .PHONY: test
 test:
-	@zsh -c "go test ./...; repeat 100 printf '#'; echo"
-	@reflex -d none -r "\.go$$" -- zsh -c "go test ./...; repeat 100 printf '#'"
+	@echo "running tests on $(run). waiting for changes..."
+	@-zsh -c "go test ./...; repeat 100 printf '#'; echo"
+	@reflex -d none -r "(\.go$$)|(go.mod)" -- zsh -c "go test ./...; repeat 100 printf '#'"
+
+.PHONY: test_race
+test_race:
+	@echo "running tests on $(run). waiting for changes..."
+	@-zsh -c "go test -race ./...; repeat 100 printf '#'; echo"
+	@reflex -d none -r "(\.go$$)|(go.mod)" -- zsh -c "go test -race ./...; repeat 100 printf '#'"
+
+.PHONY: dependencies
+dependencies:
+	@go get -u github.com/cespare/reflex
 
 .PHONY: tmpfolder
 tmpfolder:
@@ -46,7 +57,5 @@ release: tmpfolder linux darwin windows
 
 .PHONY: clean
 clean:
-	go clean
-	go clean -cache
-	go clean -modcache
+	go clean -testcache
 	rm -rf $(DEPLOY_FOLDER)

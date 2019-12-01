@@ -17,13 +17,13 @@
 //   l := rainbow.Light{
 //       Reader: buf,
 //       Writer: os.Stdout,
-//       Seed:   int(rand.Int31n(256)),
+//       Seed:   rand.Int31n(256),
 //   }
 //
 // You can also use the Light as a Writer:
 //   l := rainbow.Light{
 //       Writer: os.Stdout, // to write to
-//       Seed:   int(rand.Int31n(256)),
+//       Seed:   rand.Int31n(256),
 //   }
 //   io.Copy(l, someReader)
 package rainbow
@@ -37,8 +37,6 @@ import (
 	"regexp"
 	"strconv"
 	"sync/atomic"
-
-	"github.com/arsham/strings"
 )
 
 var (
@@ -114,10 +112,10 @@ func plotPos(x float64) (int, int, int) {
 	return int(red), int(green), int(blue)
 }
 
-func colourise(c rune, r, g, b int) *strings.Builder {
-	s := &strings.Builder{}
+func colourise(c rune, r, g, b int) *bytes.Buffer {
+	s := &bytes.Buffer{}
 	s.WriteString("\033[38;5;")
-	s.WriteBytes(strconv.AppendInt(nil, colour(float64(r), float64(g), float64(b)), 10))
+	s.Write(strconv.AppendInt(nil, colour(float64(r), float64(g), float64(b)), 10))
 	s.WriteRune('m')
 	s.WriteRune(c)
 	s.WriteString("\033[0m")

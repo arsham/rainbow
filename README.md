@@ -67,7 +67,7 @@ If you want the rainbow to be random, you can seed it this way:
 l := rainbow.Light{
     Reader: buf,
     Writer: os.Stdout,
-    Seed:   int64(rand.Int63n(256)),
+    Seed:   rand.Int63n(256),
 }
 ```
 Or if you prefer io.Copy:
@@ -75,7 +75,7 @@ Or if you prefer io.Copy:
 ```go
 l := rainbow.Light{
     Writer: os.Stdout,
-    Seed:   int64(rand.Int63n(256)),
+    Seed:   rand.Int63n(256),
 }
 io.Copy(l, someReader)
 ```

@@ -29,7 +29,7 @@ func Main() {
 	}
 	l := &rainbow.Light{
 		Writer: os.Stdout,
-		Seed:   int64(rand.Int63n(256)),
+		Seed:   rand.Int63n(256),
 	}
 
 	if _, err := io.Copy(l, r); err != nil {
