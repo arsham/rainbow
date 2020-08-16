@@ -1,4 +1,4 @@
-// Copyright 2016 Arsham Shirvani <arshamshirvani@gmail.com>. All rights reserved.
+// Copyright 2020 Arsham Shirvani <arshamshirvani@gmail.com>. All rights reserved.
 // Use of this source code is governed by the Apache 2.0 license
 // License that can be found in the LICENSE file.
 
@@ -41,7 +41,7 @@ import (
 
 var (
 	colorMatch = regexp.MustCompile("^\033" + `\[(\d+)(;\d+)?(;\d+)?[m|K]`)
-	tabs       = []byte("\t")
+
 	// ErrNilWriter is returned when Light.Writer is nil.
 	ErrNilWriter = errors.New("nil writer")
 )
@@ -70,11 +70,16 @@ func (l *Light) Paint() error {
 
 // Write paints the data and writes it into l.Writer.
 func (l *Light) Write(data []byte) (int, error) {
-	var skip, offset int
+	var (
+		skip   int
+		offset float64
+	)
 	if l.Writer == nil {
 		return 0, ErrNilWriter
 	}
 	buf := &bytes.Buffer{}
+	// the decoration is adding 15 times bytes as much.
+	buf.Grow(len(data) * 15)
 	for i, c := range string(data) {
 		if skip > 0 {
 			skip--
@@ -86,17 +91,16 @@ func (l *Light) Write(data []byte) (int, error) {
 			atomic.AddInt64(&l.Seed, 1)
 			buf.WriteByte('\n')
 		case '\t':
-			offset += len(tabs)
-			buf.Write(tabs)
+			offset++
+			buf.WriteRune('\t')
 		default:
 			pos := colorMatch.FindIndex(data[i:])
 			if pos != nil {
 				skip = pos[1] - 1
 				continue
 			}
-			r, g, b := plotPos(float64(atomic.LoadInt64(&l.Seed)) + (float64(offset) / spread))
-			w := colourise(c, r, g, b)
-			buf.Write(w.Bytes())
+			r, g, b := plotPos(float64(atomic.LoadInt64(&l.Seed)) + (offset / spread))
+			colouriseWriter(buf, c, r, g, b)
 			offset++
 		}
 		skip = 0
@@ -105,21 +109,19 @@ func (l *Light) Write(data []byte) (int, error) {
 	return len(data), err
 }
 
-func plotPos(x float64) (int, int, int) {
-	red := math.Sin(freq*x)*127 + 128
-	green := math.Sin(freq*x+2*math.Pi/3)*127 + 128
-	blue := math.Sin(freq*x+4*math.Pi/3)*127 + 128
-	return int(red), int(green), int(blue)
+func plotPos(x float64) (red, green, blue float64) {
+	red = math.Sin(freq*x)*127 + 128
+	green = math.Sin(freq*x+2*math.Pi/3)*127 + 128
+	blue = math.Sin(freq*x+4*math.Pi/3)*127 + 128
+	return red, green, blue
 }
 
-func colourise(c rune, r, g, b int) *bytes.Buffer {
-	s := &bytes.Buffer{}
+func colouriseWriter(s *bytes.Buffer, c rune, r, g, b float64) {
 	s.WriteString("\033[38;5;")
-	s.Write(strconv.AppendInt(nil, colour(float64(r), float64(g), float64(b)), 10))
-	s.WriteRune('m')
+	s.Write(strconv.AppendInt(nil, colour(r, g, b), 10))
+	s.WriteByte('m')
 	s.WriteRune(c)
 	s.WriteString("\033[0m")
-	return s
 }
 
 func colour(red, green, blue float64) int64 {

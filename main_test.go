@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0 license
 // License that can be found in the LICENSE file.
 
-package app_test
+package main
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/arsham/rainbow/app"
+	"github.com/brianvoe/gofakeit/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -47,9 +47,9 @@ func setup(t *testing.T) func() {
 func TestMainArg(t *testing.T) {
 	cleanup := setup(t)
 	defer cleanup()
-	input := "RjAuFZXfyIkaE5Ox LitwdlBD6E0GL4Y6p"
+	input := gofakeit.Sentence(20)
 	os.Args = []string{"rainbow", input}
-	app.Main()
+	main()
 	os.Stdout.Seek(0, 0)
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(os.Stdout)
@@ -62,11 +62,11 @@ func TestMainArg(t *testing.T) {
 func TestMainPipe(t *testing.T) {
 	cleanup := setup(t)
 	defer cleanup()
-	input := "RjAuFZXfyIkaE5Ox LitwdlBD6E0GL4Y6p"
+	input := gofakeit.Sentence(20)
 	os.Args = []string{"rainbow"}
 	os.Stdin.WriteString(input)
 	os.Stdin.Seek(0, 0)
-	app.Main()
+	main()
 	os.Stdout.Seek(0, 0)
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(os.Stdout)

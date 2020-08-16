@@ -1,0 +1,75 @@
+style: github
+template: CHANGELOG.tpl.md
+info:
+  title: CHANGELOG
+  repository_url: https://github.com/arsham/rainbow
+
+options:
+  commits:
+    # filters:
+    #   Type:
+    #     - feat
+    #     - add
+    #     - return
+    #     - feature
+    #     - fix
+    #     - perf
+    #     - refactor
+
+  commit_groups:
+    # group_by: Type
+
+    title_maps:
+      feat: Added
+      Feat: Added
+      add: Added
+      Add: Added
+      feature: New Feature
+      Feature: New Feature
+      fix: Fixed
+      Fix: Fixed
+      merge: Merged
+      Merge: Merged
+      perf: Performance Improvements
+      Perf: Performance Improvements
+      refactor: Code Refactoring
+      Refactor: Code Refactoring
+      Increase: Code Refactoring
+
+  header:
+    # {                      header                  }
+    # {type}{scope} {            subject             }
+    # add(core): new feature to the thing (closes #666)
+    # We are ignoring paranteses around the scope.
+    pattern: "^((\\w+)(\\((\\w+)\\))?:?\\s(.+))$"
+    pattern_maps:
+      - Subject
+      - Type
+      -
+      - Scope
+
+  issues:
+    prefix:
+      - #
+
+  refs:
+    actions:
+      - Closes
+      - Fixes
+      - Refs
+
+  merges:
+    pattern: "^Merge branch '(\\w+)'$"
+    pattern_maps:
+      - Source
+
+  reverts:
+    pattern: "^Revert \"([\\s\\S]*)\"$"
+    pattern_maps:
+      - Header
+
+  notes:
+    keywords:
+      - BREAKING CHANGE
+      - IMPORTANT
+      - important

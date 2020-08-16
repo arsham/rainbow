@@ -1,11 +1,13 @@
 # Rainbow
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![GoDoc](https://godoc.org/github.com/arsham/rainbow?status.svg)](http://godoc.org/github.com/arsham/rainbow)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/arsham/rainbow)](https://pkg.go.dev/github.com/arsham/rainbow)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/arsham/rainbow)
 [![Build Status](https://travis-ci.org/arsham/rainbow.svg?branch=master)](https://travis-ci.org/arsham/rainbow)
 [![Coverage Status](https://codecov.io/gh/arsham/rainbow/branch/master/graph/badge.svg)](https://codecov.io/gh/arsham/rainbow)
-[![Go Report Card](https://goreportcard.com/badge/github.com/arsham/rainbow)](https://goreportcard.com/report/github.com/arsham/rainbow)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9d181f84a8ab4ab3a07201e37d9a218b)](https://www.codacy.com/app/arsham/rainbow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=arsham/rainbow&amp;utm_campaign=Badge_Grade)
+[![Go Report Card](https://goreportcard.com/badge/github.com/arsham/rainbow)](https://goreportcard.com/report/github.com/arsham/rainbow)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 
 Tasty rainbows for your terminal like these:
 
@@ -25,33 +27,36 @@ This app was inspired by lolcats, but written in Go.
 
 Get the library:
 ```bash
-$ go get github.com/arsham/rainbow
+go get github.com/arsham/rainbow
 ```
 
 ## Usage
 
 You can pipe the text into the app in many ways. Choose one that is suitable for
 you:
+
 ```bash
 # File contents:
-$ rainbow < filename.txt
+rainbow < filename.txt
 
 # Echo a string:
-$ echo "Any quotes" | rainbow
+echo "Any quotes" | rainbow
 
 # Here string:
-$ rainbow <<END
+rainbow <<END
 Consectetur aliqua do quis sed
 proident enim fugiat occaecat nisi
 in deserunt culpa aliquip do excepteur.
 END
 
 # Output of a program:
-$ ls -l | rainbow
+ls -l | rainbow
 ```
 
 ## As library
+
 `Light` struct implements io.Reader and io.Writer:
+
 ```go
 import "github.com/arsham/rainbow/rainbow"
 // ...
@@ -61,6 +66,7 @@ l := rainbow.Light{
 }
 l.Paint() // will rainbow everything it reads from reader to writer.
 ```
+
 If you want the rainbow to be random, you can seed it this way:
 
 ```go
@@ -70,6 +76,7 @@ l := rainbow.Light{
     Seed:   rand.Int63n(256),
 }
 ```
+
 Or if you prefer io.Copy:
 
 ```go
@@ -81,6 +88,7 @@ io.Copy(l, someReader)
 ```
 
 ## See Also
+
 See also [Figurine][figurine]. It prints beautiful ASCII arts in FIGlet.
 
 ## License

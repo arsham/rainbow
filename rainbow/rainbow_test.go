@@ -35,32 +35,32 @@ func readFile(t *testing.T, name string) []byte {
 
 func TestLightPaint(t *testing.T) {
 	t.Parallel()
-	plain := readFile(t, "plain.txt")
-	painted := readFile(t, "painted.txt")
+	plain := string(readFile(t, "plain.txt"))
+	painted := string(readFile(t, "painted.txt"))
+	//nolint:stylecheck // this is on purpose.
 	tcs := []struct {
-		sample  []byte
-		painted []byte
+		sample  string
+		painted string
 	}{
 		{
-			[]byte("2d7gMRSgGLj9F0c tPjSmsdRsTej4x7BJiOp R9HUHEiyH0G1Ld XeL5fjQ1KkxI3"),
-			[]byte("[38;5;154m2[0m[38;5;154md[0m[38;5;154m7[0m[38;5;154mg[0m[38;5;154mM[0m[38;5;154mR[0m[38;5;154mS[0m[38;5;148mg[0m[38;5;184mG[0m[38;5;184mL[0m[38;5;184mj[0m[38;5;184m9[0m[38;5;184mF[0m[38;5;184m0[0m[38;5;184mc[0m[38;5;184m [0m[38;5;184mt[0m[38;5;184mP[0m[38;5;184mj[0m[38;5;178mS[0m[38;5;214mm[0m[38;5;214ms[0m[38;5;214md[0m[38;5;214mR[0m[38;5;214ms[0m[38;5;214mT[0m[38;5;214me[0m[38;5;214mj[0m[38;5;214m4[0m[38;5;208mx[0m[38;5;208m7[0m[38;5;208mB[0m[38;5;208mJ[0m[38;5;208mi[0m[38;5;208mO[0m[38;5;208mp[0m[38;5;208m [0m[38;5;208mR[0m[38;5;209m9[0m[38;5;203mH[0m[38;5;203mU[0m[38;5;203mH[0m[38;5;203mE[0m[38;5;203mi[0m[38;5;203my[0m[38;5;203mH[0m[38;5;203m0[0m[38;5;203mG[0m[38;5;203m1[0m[38;5;203mL[0m[38;5;204md[0m[38;5;198m [0m[38;5;198mX[0m[38;5;198me[0m[38;5;198mL[0m[38;5;198m5[0m[38;5;198mf[0m[38;5;198mj[0m[38;5;198mQ[0m[38;5;198m1[0m[38;5;199mK[0m[38;5;199mk[0m[38;5;199mx[0m[38;5;199mI[0m[38;5;199m3[0m"),
+			"2d7gMRSgGLj9F0c tPjSmsdRsTej4x7BJiOp R9HUHEiyH0G1Ld XeL5fjQ1KkxI3",
+			`[38;5;154m2[0m[38;5;154md[0m[38;5;154m7[0m[38;5;154mg[0m[38;5;154mM[0m[38;5;154mR[0m[38;5;154mS[0m[38;5;148mg[0m[38;5;184mG[0m[38;5;184mL[0m[38;5;184mj[0m[38;5;184m9[0m[38;5;184mF[0m[38;5;184m0[0m[38;5;184mc[0m[38;5;184m [0m[38;5;184mt[0m[38;5;184mP[0m[38;5;184mj[0m[38;5;178mS[0m[38;5;214mm[0m[38;5;214ms[0m[38;5;214md[0m[38;5;214mR[0m[38;5;214ms[0m[38;5;214mT[0m[38;5;214me[0m[38;5;214mj[0m[38;5;214m4[0m[38;5;208mx[0m[38;5;208m7[0m[38;5;208mB[0m[38;5;208mJ[0m[38;5;208mi[0m[38;5;208mO[0m[38;5;208mp[0m[38;5;208m [0m[38;5;208mR[0m[38;5;209m9[0m[38;5;203mH[0m[38;5;203mU[0m[38;5;203mH[0m[38;5;203mE[0m[38;5;203mi[0m[38;5;203my[0m[38;5;203mH[0m[38;5;203m0[0m[38;5;203mG[0m[38;5;203m1[0m[38;5;203mL[0m[38;5;204md[0m[38;5;198m [0m[38;5;198mX[0m[38;5;198me[0m[38;5;198mL[0m[38;5;198m5[0m[38;5;198mf[0m[38;5;198mj[0m[38;5;198mQ[0m[38;5;198m1[0m[38;5;199mK[0m[38;5;199mk[0m[38;5;199mx[0m[38;5;199mI[0m[38;5;199m3[0m`,
 		},
 		{
-			[]byte("11✂1"),
-			[]byte("[38;5;154m1[0m[38;5;154m1[0m[38;5;154m✂[0m[38;5;154m1[0m"),
+			"11✂1",
+			`[38;5;154m1[0m[38;5;154m1[0m[38;5;154m✂[0m[38;5;154m1[0m`,
 		},
 		{
-			[]byte("🏧-✂1"),
-			[]byte("[38;5;154m🏧[0m[38;5;154m-[0m[38;5;154m✂[0m[38;5;154m1[0m"),
+			"🏧-✂1",
+			`[38;5;154m🏧[0m[38;5;154m-[0m[38;5;154m✂[0m[38;5;154m1[0m`,
 		},
 		{
 			plain,
 			painted,
 		},
 	}
-
 	for _, tc := range tcs {
-		r := bytes.NewReader(tc.sample)
+		r := strings.NewReader(tc.sample)
 		w := &bytes.Buffer{}
 		l := &Light{
 			Reader: r,
@@ -78,18 +78,13 @@ func BenchmarkLightPaint(b *testing.B) {
 		lines   int
 		letters int
 	}{
-		{1, 1000},
-		{1, 10000},
-		{1, 100000},
-		{10, 1000},
-		{10, 10000},
-		{10, 100000},
-		{50, 1000},
-		{50, 10000},
-		{100, 1000},
-		{100, 10000},
-		{1000, 1000},
-		{1000, 10000},
+		{1, 10},
+		{1, 240},
+		{10, 10},
+		{10, 240},
+		{100, 10},
+		{100, 240},
+		{500, 500},
 	}
 	for _, bc := range bcs {
 		var (
@@ -105,9 +100,10 @@ func BenchmarkLightPaint(b *testing.B) {
 			r.Write([]byte("\n"))
 			totalLen += len(line) + 1
 		}
+		b.ResetTimer()
 		b.Run(name, func(b *testing.B) {
-			b.ResetTimer()
 			b.Run("Serial", func(b *testing.B) {
+				b.ResetTimer()
 				l := &Light{
 					Writer: w,
 					Reader: r,
@@ -118,6 +114,7 @@ func BenchmarkLightPaint(b *testing.B) {
 				}
 			})
 			b.Run("Parallel", func(b *testing.B) {
+				b.ResetTimer()
 				b.RunParallel(func(bp *testing.PB) {
 					l := &Light{
 						Writer: w,
@@ -151,20 +148,23 @@ func TestPlotPos(t *testing.T) {
 		{"360", 360, 2, 176, 205},
 	}
 	for _, tc := range tcs {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			got, got1, got2 := plotPos(tc.x)
-			assert.Equal(t, tc.red, got, "red value")
-			assert.Equal(t, tc.green, got1, "green value")
-			assert.Equal(t, tc.blue, got2, " blue value")
+			assert.Equal(t, tc.red, int(got), "red value")
+			assert.Equal(t, tc.green, int(got1), "green value")
+			assert.Equal(t, tc.blue, int(got2), " blue value")
 		})
 	}
 }
 
-var got, got1, got2 int
+var got, got1, got2 float64
 
 func BenchmarkPlotPos(b *testing.B) {
 	b.Run("Serial", func(b *testing.B) {
-		got, got1, got2 = plotPos(100)
+		for i := 0; i < b.N; i++ {
+			got, got1, got2 = plotPos(100)
+		}
 	})
 	b.Run("Parallel", func(b *testing.B) {
 		b.RunParallel(func(b *testing.PB) {
@@ -195,16 +195,18 @@ func TestColour(t *testing.T) {
 	}
 }
 
+var intval int64
+
 func BenchmarkColour(b *testing.B) {
 	b.Run("Serial", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			colour(float64(0), float64(100), float64(1000))
+			intval = colour(0, 100, 1000)
 		}
 	})
 	b.Run("Parallel", func(b *testing.B) {
 		b.RunParallel(func(b *testing.PB) {
 			for b.Next() {
-				colour(float64(0), float64(100), float64(1000))
+				intval = colour(0, 100, 1000)
 			}
 		})
 	})
@@ -217,32 +219,34 @@ func (w *writeError) Write(p []byte) (int, error) { return (*w)(p) }
 func TestLightWrite(t *testing.T) {
 	errExam := errors.New("this error")
 	wrErr := writeError(func([]byte) (int, error) { return 0, errExam })
+	//nolint:stylecheck // this is on purpose.
 	tcs := map[string]struct {
-		writer   *bytes.Buffer
 		data     []byte
 		want     []byte
 		checkErr bool
 	}{
-		"new line":           {&bytes.Buffer{}, []byte("\n"), []byte("\n"), true},
-		"tab":                {&bytes.Buffer{}, []byte("\t"), tabs, true},
-		"NL tab":             {&bytes.Buffer{}, []byte("\n\t"), append([]byte("\n"), tabs...), true},
-		"tab NL":             {&bytes.Buffer{}, []byte("\t\n"), append(tabs, byte('\n')), true},
-		`033[38;5;2m`:        {&bytes.Buffer{}, []byte("\033[38;5;2m"), []byte(""), false},
-		`033[38;5;2K`:        {&bytes.Buffer{}, []byte("\033[38;5;2K"), []byte(""), false},
-		`033[32K`:            {&bytes.Buffer{}, []byte("\033[32K"), []byte(""), false},
-		`033[3K`:             {&bytes.Buffer{}, []byte("\033[3K"), []byte(""), false},
-		`033[3KARSHAM bytes`: {&bytes.Buffer{}, []byte("\033[3KARSHAM"), []byte{27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 82, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 83, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 72, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 77, 27, 91, 48, 109}, true},
-		`033[3KARSHAM string`: {&bytes.Buffer{}, []byte("\033[3KARSHAM"), []byte("[38;5;154mA[0m[38;5;154mR[0m[38;5;154mS[0m[38;5;154mH[0m[38;5;154mA[0m[38;5;154mM[0m"), true},
+		"new line":           {[]byte("\n"), []byte("\n"), true},
+		"tab":                {[]byte("\t"), []byte("\t"), true},
+		"NL tab":             {[]byte("\n\t"), []byte("\n\t"), true},
+		"tab NL":             {[]byte("\t\n"), []byte("\t\n"), true},
+		`033[38;5;2m`:        {[]byte("\033[38;5;2m"), []byte(""), false},
+		`033[38;5;2K`:        {[]byte("\033[38;5;2K"), []byte(""), false},
+		`033[32K`:            {[]byte("\033[32K"), []byte(""), false},
+		`033[3K`:             {[]byte("\033[3K"), []byte(""), false},
+		`033[3KARSHAM bytes`: {[]byte("\033[3KARSHAM"), []byte{27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 82, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 83, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 72, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 65, 27, 91, 48, 109, 27, 91, 51, 56, 59, 53, 59, 49, 53, 52, 109, 77, 27, 91, 48, 109}, true},
+		`033[3KARSHAM string`: {[]byte("\033[3KARSHAM"), []byte("[38;5;154mA[0m[38;5;154mR[0m[38;5;154mS[0m[38;5;154mH[0m[38;5;154mA[0m[38;5;154mM[0m"), true},
 	}
 	for name, tc := range tcs {
+		tc := tc
 		t.Run(name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
 			l := &Light{
-				Writer: tc.writer,
+				Writer: buf,
 				Seed:   1,
 			}
 			_, err := l.Write(tc.data)
 			assert.NoError(t, err)
-			got := tc.writer.Bytes()
+			got := buf.Bytes()
 			if !bytes.Equal(got, tc.want) {
 				t.Errorf("got (%v), want (%v)", got, tc.want)
 			}
@@ -303,33 +307,38 @@ func BenchmarkLightWrite(b *testing.B) {
 	}{
 		{1, 1, "\n"},
 		{5, 10, strings.Repeat("aaaaa\n", 10)},
-		{15, 100, strings.Repeat("aaaaabbbbbccccc\n", 100)},
-		{15, 1000, strings.Repeat("aaaaabbbbbccccc\n", 1000)},
-		{100, 1000, strings.Repeat(strings.Repeat("a", 100)+"\n", 1000)},
-		{500, 1000, strings.Repeat(strings.Repeat("a", 500)+"\n", 1000)},
-		{1000, 1000, strings.Repeat(strings.Repeat("a", 1000)+"\n", 1000)},
+		{15, 50, strings.Repeat("aaaaabbbbbccccc\n", 15)},
+		{15, 100, strings.Repeat(strings.Repeat("abcde", 20)+"\n", 15)},
+		{50, 50, strings.Repeat(strings.Repeat("abcde", 10)+"\n", 50)},
+		{100, 120, strings.Repeat(strings.Repeat("a", 120)+"\n", 100)},
 	}
 	b.ResetTimer()
 	b.Run("Serial", func(b *testing.B) {
 		for _, bc := range bcs {
+			bc := bc
 			l := &Light{
 				Writer: ioutil.Discard,
 				Seed:   1,
 			}
 			name := fmt.Sprintf("line%d_len%d", bc.line, bc.length)
 			b.Run(name, func(b *testing.B) {
-				l.Write([]byte(bc.data))
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					l.Write([]byte(bc.data))
+				}
 			})
 		}
 	})
 	b.Run("Parallel", func(b *testing.B) {
 		for _, bc := range bcs {
+			bc := bc
 			l := &Light{
 				Writer: ioutil.Discard,
 				Seed:   1,
 			}
 			name := fmt.Sprintf("line%d_len%d", bc.line, bc.length)
 			b.Run(name, func(b *testing.B) {
+				b.ResetTimer()
 				b.RunParallel(func(b *testing.PB) {
 					for b.Next() {
 						l.Write([]byte(bc.data))
@@ -340,7 +349,7 @@ func BenchmarkLightWrite(b *testing.B) {
 	})
 }
 
-// making sure we are not altering any texts
+// making sure we are not altering any texts.
 func TestLightWriteRevert(t *testing.T) {
 	re := regexp.MustCompile(`\x1B\[[0-9;]*[JKmsu]`)
 	tcs := []string{
