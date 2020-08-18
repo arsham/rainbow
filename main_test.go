@@ -44,14 +44,20 @@ func setup(t *testing.T) func() {
 	}
 }
 
-func TestMainArg(t *testing.T) {
+func TestMain(t *testing.T) {
+	t.Run("WithArgs", testMainWithArgs)
+	t.Run("WithPipe", testMainWithPipe)
+	t.Run("CopyError", testMainCopyError)
+}
+
+func testMainWithArgs(t *testing.T) {
 	cleanup := setup(t)
 	defer cleanup()
 	input := gofakeit.Sentence(20)
 	os.Args = []string{"rainbow", input}
 	main()
 	os.Stdout.Seek(0, 0)
-	buf := new(bytes.Buffer)
+	buf := &bytes.Buffer{}
 	buf.ReadFrom(os.Stdout)
 
 	out := buf.Bytes()
@@ -59,7 +65,7 @@ func TestMainArg(t *testing.T) {
 	assert.Equal(t, []byte(input+"\n"), got)
 }
 
-func TestMainPipe(t *testing.T) {
+func testMainWithPipe(t *testing.T) {
 	cleanup := setup(t)
 	defer cleanup()
 	input := gofakeit.Sentence(20)
@@ -68,10 +74,27 @@ func TestMainPipe(t *testing.T) {
 	os.Stdin.Seek(0, 0)
 	main()
 	os.Stdout.Seek(0, 0)
-	buf := new(bytes.Buffer)
+	buf := &bytes.Buffer{}
 	buf.ReadFrom(os.Stdout)
 
 	out := buf.Bytes()
 	got := re.ReplaceAll(out, []byte(""))
 	assert.Equal(t, []byte(input), got)
+}
+
+func testMainCopyError(t *testing.T) {
+	cleanup := setup(t)
+	defer cleanup()
+	fin, err := ioutil.TempFile("", "testMain")
+	require.NoError(t, err)
+	require.NoError(t, fin.Close())
+	os.Stdin = fin
+
+	os.Args = []string{"rainbow"}
+	main()
+	os.Stdout.Seek(0, 0)
+	buf := &bytes.Buffer{}
+	buf.ReadFrom(os.Stdout)
+	got := buf.String()
+	assert.Contains(t, got, "already closed")
 }

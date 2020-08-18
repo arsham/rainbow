@@ -6,8 +6,8 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
-	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -31,6 +31,6 @@ func main() {
 	}
 
 	if _, err := io.Copy(l, r); err != nil {
-		log.Fatal(err)
+		fmt.Println("Error painting your input:", err)
 	}
 }

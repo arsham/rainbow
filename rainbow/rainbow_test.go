@@ -184,8 +184,8 @@ func TestColour(t *testing.T) {
 	bc := func(value float64, factor int) int {
 		return int(6*value/256) * factor
 	}
-	check := func(red, green, blue float64) int64 {
-		return int64(16 + bc(red, 36) + bc(green, 6) + bc(blue, 1))
+	check := func(red, green, blue float64) int {
+		return 16 + bc(red, 36) + bc(green, 6) + bc(blue, 1)
 	}
 	for i := 0; i < 1000; i++ {
 		red, green, blue := float64(randColour()), float64(randColour()), float64(randColour())
@@ -195,18 +195,18 @@ func TestColour(t *testing.T) {
 	}
 }
 
-var intval int64
+var intval int
 
 func BenchmarkColour(b *testing.B) {
 	b.Run("Serial", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			intval = colour(0, 100, 1000)
+			intval = colour(6, 100, 1000)
 		}
 	})
 	b.Run("Parallel", func(b *testing.B) {
 		b.RunParallel(func(b *testing.PB) {
 			for b.Next() {
-				intval = colour(0, 100, 1000)
+				intval = colour(6, 100, 1000)
 			}
 		})
 	})

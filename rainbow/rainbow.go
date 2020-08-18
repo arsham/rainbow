@@ -36,11 +36,11 @@ import (
 	"math/rand"
 	"regexp"
 	"strconv"
-	"sync/atomic"
 )
 
 var (
-	colorMatch = regexp.MustCompile("^\033" + `\[(\d+)(;\d+)?(;\d+)?[m|K]`)
+	// we remove all previous paintings to create a new rainbow.
+	colorMatch = regexp.MustCompile("^\033" + `\[\d+(;\d+)?(;\d+)?[mK]`)
 
 	// ErrNilWriter is returned when Light.Writer is nil.
 	ErrNilWriter = errors.New("nil writer")
@@ -70,43 +70,35 @@ func (l *Light) Paint() error {
 
 // Write paints the data and writes it into l.Writer.
 func (l *Light) Write(data []byte) (int, error) {
-	var (
-		skip   int
-		offset float64
-	)
 	if l.Writer == nil {
 		return 0, ErrNilWriter
 	}
-	buf := &bytes.Buffer{}
-	// the decoration is adding 15 times bytes as much.
-	buf.Grow(len(data) * 15)
-	for i, c := range string(data) {
-		if skip > 0 {
-			skip--
-			continue
-		}
+	var (
+		offset  float64
+		dataLen = len(data)
+		// 16 times seems to be the sweet spot.
+		buf  = bytes.NewBuffer(make([]byte, 0, dataLen*16))
+		seed = l.Seed
+	)
+
+	data = colorMatch.ReplaceAll(data, []byte(""))
+	for _, c := range string(data) {
 		switch c {
 		case '\n':
 			offset = 0
-			atomic.AddInt64(&l.Seed, 1)
+			seed++
 			buf.WriteByte('\n')
 		case '\t':
 			offset++
-			buf.WriteRune('\t')
+			buf.WriteByte('\t')
 		default:
-			pos := colorMatch.FindIndex(data[i:])
-			if pos != nil {
-				skip = pos[1] - 1
-				continue
-			}
-			r, g, b := plotPos(float64(atomic.LoadInt64(&l.Seed)) + (offset / spread))
+			r, g, b := plotPos(float64(seed) + (offset / spread))
 			colouriseWriter(buf, c, r, g, b)
 			offset++
 		}
-		skip = 0
 	}
 	_, err := l.Writer.Write(buf.Bytes())
-	return len(data), err
+	return dataLen, err
 }
 
 func plotPos(x float64) (red, green, blue float64) {
@@ -116,18 +108,30 @@ func plotPos(x float64) (red, green, blue float64) {
 	return red, green, blue
 }
 
+const max = 16 + (6 * (127 + 128) / 256 * 36) + (6 * (127 + 128) / 256 * 6) + (6 * (127 + 128) / 256)
+
+// nums is used to cache the values of strconv.Itoa(n) for better performance
+// gains.
+var nums = make([]string, 0, max)
+
+func init() {
+	for i := 0; i < max; i++ {
+		nums = append(nums, strconv.Itoa(i))
+	}
+}
+
 func colouriseWriter(s *bytes.Buffer, c rune, r, g, b float64) {
 	s.WriteString("\033[38;5;")
-	s.Write(strconv.AppendInt(nil, colour(r, g, b), 10))
+	s.WriteString(nums[colour(r, g, b)])
 	s.WriteByte('m')
 	s.WriteRune(c)
 	s.WriteString("\033[0m")
 }
 
-func colour(red, green, blue float64) int64 {
+func colour(red, green, blue float64) int {
 	return 16 + baseColor(red, 36) + baseColor(green, 6) + baseColor(blue, 1)
 }
 
-func baseColor(value float64, factor int64) int64 {
-	return int64(6*value/256) * factor
+func baseColor(value float64, factor int) int {
+	return int(6*value/256) * factor
 }

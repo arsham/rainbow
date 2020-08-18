@@ -5,6 +5,13 @@
 
 
 
+<a name="v1.1.1"></a>
+## [v1.1.1] - 2020-08-18
+
+### Performance Improvements
+- Performance improvements over cpu and memory
+
+
 <a name="v1.1.0"></a>
 ## [v1.1.0] - 2020-08-16
 
@@ -52,7 +59,8 @@
 
 
 
-[Unreleased]: https://github.com/arsham/rainbow/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/arsham/rainbow/compare/v1.1.1...HEAD
+[v1.1.1]: https://github.com/arsham/rainbow/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/arsham/rainbow/compare/v1.0.1...v1.1.0
 [v1.0.1]: https://github.com/arsham/rainbow/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/arsham/rainbow/compare/v0.1...v1.0.0
