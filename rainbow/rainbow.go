@@ -17,13 +17,13 @@
 //   l := rainbow.Light{
 //       Reader: buf,
 //       Writer: os.Stdout,
-//       Seed:   rand.Int31n(256),
+//       Seed:   rand.Int63n(256),
 //   }
 //
 // You can also use the Light as a Writer:
 //   l := rainbow.Light{
 //       Writer: os.Stdout, // to write to
-//       Seed:   rand.Int31n(256),
+//       Seed:   rand.Int63n(256),
 //   }
 //   io.Copy(l, someReader)
 package rainbow
