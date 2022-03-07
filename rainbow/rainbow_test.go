@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"os"
 	"regexp"
@@ -28,7 +28,7 @@ func init() {
 func readFile(t *testing.T, name string) []byte {
 	f, err := os.Open("testdata/" + name)
 	require.NoError(t, err)
-	b, err := ioutil.ReadAll(f)
+	b, err := io.ReadAll(f)
 	require.NoError(t, err)
 	return b
 }
@@ -97,7 +97,7 @@ func BenchmarkLightPaint(b *testing.B) {
 		rand.Read(line)
 		for i := 0; i < bc.lines; i++ {
 			r.Write(line)
-			r.Write([]byte("\n"))
+			r.WriteString("\n")
 			totalLen += len(line) + 1
 		}
 		b.ResetTimer()
@@ -150,6 +150,7 @@ func TestPlotPos(t *testing.T) {
 	for _, tc := range tcs {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			got, got1, got2 := plotPos(tc.x)
 			assert.Equal(t, tc.red, int(got), "red value")
 			assert.Equal(t, tc.green, int(got1), "green value")
@@ -273,26 +274,29 @@ func TestLightWriteRace(t *testing.T) {
 		count = 1000
 		data  = bytes.Repeat([]byte("abc def\n"), 10)
 		l     = &Light{
-			Writer: ioutil.Discard,
+			Writer: io.Discard,
 			Seed:   1,
 		}
 	)
 	wg.Add(3)
 	go func() {
 		for i := 0; i < count; i++ {
-			l.Write(data)
+			_, err := l.Write(data)
+			require.NoError(t, err)
 		}
 		wg.Done()
 	}()
 	go func() {
 		for i := 0; i < count; i++ {
-			l.Write(data)
+			_, err := l.Write(data)
+			require.NoError(t, err)
 		}
 		wg.Done()
 	}()
 	go func() {
 		for i := 0; i < count; i++ {
-			l.Write(data)
+			_, err := l.Write(data)
+			require.NoError(t, err)
 		}
 		wg.Done()
 	}()
@@ -317,7 +321,7 @@ func BenchmarkLightWrite(b *testing.B) {
 		for _, bc := range bcs {
 			bc := bc
 			l := &Light{
-				Writer: ioutil.Discard,
+				Writer: io.Discard,
 				Seed:   1,
 			}
 			name := fmt.Sprintf("line%d_len%d", bc.line, bc.length)
@@ -333,7 +337,7 @@ func BenchmarkLightWrite(b *testing.B) {
 		for _, bc := range bcs {
 			bc := bc
 			l := &Light{
-				Writer: ioutil.Discard,
+				Writer: io.Discard,
 				Seed:   1,
 			}
 			name := fmt.Sprintf("line%d_len%d", bc.line, bc.length)
