@@ -32,33 +32,18 @@ ci_tests: ## Run tests for CI.
 	golangci-lint run ./...
 	go test -trimpath --timeout=5m -failfast -v -race -covermode=atomic -coverprofile=coverage.out ./...
 
-
 .PHONY: dependencies
 dependencies: ## Install dependencies requried for development operations.
 	@go get -u github.com/cespare/reflex
-	@go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.30.0
-	@go get -u github.com/git-chglog/git-chglog/cmd/git-chglog
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.44.2
+	@go get -u ./...
 	@go mod tidy
-
-
-.PHONY: changelog
-changelog: ## Update the changelog.
-	@git-chglog > CHANGELOG.md
-	@echo "Changelog has been updated."
-
-
-.PHONY: changelog_release
-changelog_release: ## Update the changelog with a release tag.
-	@git-chglog --next-tag $(tag) > CHANGELOG.md
-	@echo "Changelog has been updated."
-
 
 .PHONY: clean
 clean: ## Clean test caches and tidy up modules.
 	@go clean -testcache
 	@go mod tidy
 	@rm -rf $(DEPLOY_FOLDER)
-
 
 .PHONY: tmpfolder
 tmpfolder: ## Create the temporary folder.
@@ -91,7 +76,6 @@ windows: ## Build for windoze.
 	@cd $(DEPLOY_FOLDER) ; sha256sum figurine_windows_$(TARGET).zip >> $(CHECKSUM_FILE)
 	@echo "Windows target:" $(DEPLOY_FOLDER)/figurine_windows_$(TARGET).zip
 	@rm $(DEPLOY_FOLDER)/$(RELEADE_NAME).exe
-
 
 .PHONY: release
 release: ## Create releases for Linux, Mac, and windoze.
