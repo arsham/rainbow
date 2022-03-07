@@ -17,19 +17,20 @@ MAKEFLAGS += -j1
 install: ## Install the binary.
 	@go install -trimpath -ldflags="-s -w"
 
-
 .PHONY: unittest
 unittest: ## Run unit tests in watch mode. You can set: [run, timeout, short, dir, flags]. Example: make unittest flags="-race".
 	@echo "running tests on $(run). waiting for changes..."
 	@-zsh -c "go test -trimpath --timeout=$(timeout) $(short) $(dir) -run $(run) $(flags); repeat 100 printf '#'; echo"
 	@reflex -d none -r "(\.go$$)|(go.mod)" -- zsh -c "go test -trimpath --timeout=$(timeout) $(short) $(dir) -run $(run) $(flags); repeat 100 printf '#'"
 
-
-.PHONY: ci_tests
-ci_tests: ## Run tests for CI.
+.PHONY: lint
+lint: ## Run linters.
 	go fmt ./...
 	go vet ./...
 	golangci-lint run ./...
+
+.PHONY: ci_tests
+ci_tests: ## Run tests for CI.
 	go test -trimpath --timeout=5m -failfast -v -race -covermode=atomic -coverprofile=coverage.out ./...
 
 .PHONY: dependencies

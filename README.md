@@ -2,7 +2,7 @@
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/arsham/rainbow)](https://pkg.go.dev/github.com/arsham/rainbow)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/arsham/rainbow)
-[![Build Status](https://travis-ci.org/arsham/rainbow.svg?branch=master)](https://travis-ci.org/arsham/rainbow)
+[![Build Status](https://github.com/arsham/rainbow/actions/workflows/go.yml/badge.svg)](https://github.com/arsham/rainbow/actions/workflows/go.yml)
 [![Coverage Status](https://codecov.io/gh/arsham/rainbow/branch/master/graph/badge.svg)](https://codecov.io/gh/arsham/rainbow)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9d181f84a8ab4ab3a07201e37d9a218b)](https://www.codacy.com/app/arsham/rainbow?utm_source=github.com&utm_medium=referral&utm_content=arsham/rainbow&utm_campaign=Badge_Grade)
 [![Go Report Card](https://goreportcard.com/badge/github.com/arsham/rainbow)](https://goreportcard.com/report/github.com/arsham/rainbow)
