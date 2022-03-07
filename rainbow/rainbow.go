@@ -39,7 +39,7 @@ import (
 )
 
 var (
-	// we remove all previous paintings to create a new rainbow.
+	// We remove all previous paintings to create a new rainbow.
 	colorMatch = regexp.MustCompile("^\033" + `\[\d+(;\d+)?(;\d+)?[mK]`)
 
 	// ErrNilWriter is returned when Light.Writer is nil.

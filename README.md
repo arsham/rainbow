@@ -4,10 +4,9 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/arsham/rainbow)
 [![Build Status](https://travis-ci.org/arsham/rainbow.svg?branch=master)](https://travis-ci.org/arsham/rainbow)
 [![Coverage Status](https://codecov.io/gh/arsham/rainbow/branch/master/graph/badge.svg)](https://codecov.io/gh/arsham/rainbow)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9d181f84a8ab4ab3a07201e37d9a218b)](https://www.codacy.com/app/arsham/rainbow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=arsham/rainbow&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9d181f84a8ab4ab3a07201e37d9a218b)](https://www.codacy.com/app/arsham/rainbow?utm_source=github.com&utm_medium=referral&utm_content=arsham/rainbow&utm_campaign=Badge_Grade)
 [![Go Report Card](https://goreportcard.com/badge/github.com/arsham/rainbow)](https://goreportcard.com/report/github.com/arsham/rainbow)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
 
 Tasty rainbows for your terminal like these:
 
@@ -25,9 +24,12 @@ This app was inspired by lolcats, but written in Go.
 
 ## Installation
 
-Get the library:
+You can download the latest binary from
+[here](https://github.com/arsham/rainbow/releases), or you can compile from
+source:
+
 ```bash
-go get github.com/arsham/rainbow
+go install github.com/arsham/rainbow@latest
 ```
 
 ## Usage
@@ -92,6 +94,7 @@ io.Copy(l, someReader)
 See also [Figurine][figurine]. It prints beautiful ASCII arts in FIGlet.
 
 ## License
+
 Use of this source code is governed by the Apache 2.0 license. License that can
 be found in the [LICENSE](./LICENSE) file.
 
