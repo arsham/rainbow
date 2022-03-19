@@ -1,10 +1,10 @@
 module github.com/arsham/rainbow
 
-go 1.17
+go 1.18
 
 require (
 	github.com/brianvoe/gofakeit/v5 v5.11.2
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 )
 
 require (

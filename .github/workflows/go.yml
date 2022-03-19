@@ -2,7 +2,10 @@ name: Continues Integration
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+      - feature/*
+      - bugfix/*
   pull_request:
     branches:
       - master
@@ -13,24 +16,27 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ["1.17", "1.18"]
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - name: Set up Go
+      - name: Set up Go ${{ matrix.go }}
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: ${{ matrix.go }}
 
       - uses: actions/cache@v2
         with:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ matrix.go }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-
+            ${{ runner.os }}-go-${{ matrix.go }}
 
       - name: Running Tests
         run: make ci_tests
