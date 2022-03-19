@@ -182,10 +182,10 @@ func TestColour(t *testing.T) {
 	randColour := func() int32 {
 		return rand.Int31n(256)
 	}
-	bc := func(value float64, factor int) int {
-		return int(6*value/256) * factor
+	bc := func(value float64, factor uint8) uint8 {
+		return uint8(6*value/256) * factor
 	}
-	check := func(red, green, blue float64) int {
+	check := func(red, green, blue float64) uint8 {
 		return 16 + bc(red, 36) + bc(green, 6) + bc(blue, 1)
 	}
 	for i := 0; i < 1000; i++ {
@@ -196,7 +196,7 @@ func TestColour(t *testing.T) {
 	}
 }
 
-var intval int
+var intval uint8
 
 func BenchmarkColour(b *testing.B) {
 	b.Run("Serial", func(b *testing.B) {

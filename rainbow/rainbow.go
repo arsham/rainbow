@@ -115,8 +115,8 @@ const max = 16 + (6 * (127 + 128) / 256 * 36) + (6 * (127 + 128) / 256 * 6) + (6
 var nums = make([]string, 0, max)
 
 func init() {
-	for i := 0; i < max; i++ {
-		nums = append(nums, strconv.Itoa(i))
+	for i := int64(0); i < max; i++ {
+		nums = append(nums, strconv.FormatInt(i, 10))
 	}
 }
 
@@ -128,10 +128,10 @@ func colouriseWriter(s *bytes.Buffer, c rune, r, g, b float64) {
 	s.WriteString("\033[0m")
 }
 
-func colour(red, green, blue float64) int {
+func colour(red, green, blue float64) uint8 {
 	return 16 + baseColor(red, 36) + baseColor(green, 6) + baseColor(blue, 1)
 }
 
-func baseColor(value float64, factor int) int {
-	return int(6*value/256) * factor
+func baseColor(value float64, factor uint8) uint8 {
+	return uint8(6*value/256) * factor
 }
