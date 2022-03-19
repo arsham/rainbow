@@ -37,6 +37,10 @@ ci_tests: ## Run tests for CI.
 dependencies: ## Install dependencies requried for development operations.
 	@go install github.com/cespare/reflex@latest
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45.0
+	@go install github.com/psampaz/go-mod-outdated@latest
+	@go install github.com/jondot/goweight@latest
+	@go get -t -u golang.org/x/tools/cmd/cover
+	@go get -t -u github.com/sonatype-nexus-community/nancy@latest
 	@go get -u ./...
 	@go mod tidy
 
@@ -88,3 +92,9 @@ coverage: ## Show the test coverage on browser.
 	go test -covermode=count -coverprofile=coverage.out ./...
 	go tool cover -func=coverage.out | tail -n 1
 	go tool cover -html=coverage.out
+
+.PHONY: audit
+audit:
+	go list -u -m -json all | go-mod-outdated -update -direct
+	go list -json -m all | nancy sleuth
+	goweight | head -n 20

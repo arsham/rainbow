@@ -49,6 +49,23 @@ jobs:
           flags: unittests
           name: codecov-umbrella
 
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set up Go ${{ matrix.go }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: WriteGoList
+        run: go list -json -m all > go.list
+
+      - name: Nancy
+        uses: sonatype-nexus-community/nancy-github-action@main
+
   lint:
     runs-on: ubuntu-latest
     steps:
