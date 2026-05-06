@@ -39,7 +39,7 @@ dependencies: ## Install dependencies required for development operations.
 	@go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 	@go install github.com/psampaz/go-mod-outdated@latest
 	@go install github.com/jondot/goweight@latest
-	@go install github.com/sonatype-nexus-community/nancy@latest
+	@go install golang.org/x/vuln/cmd/govulncheck@latest
 	@go get -t -u ./...
 	@go mod tidy
 
@@ -94,5 +94,5 @@ coverage: ## Show the test coverage on browser.
 .PHONY: audit
 audit: ## Audit the code for updates, vulnerabilities and binary weight.
 	go list -u -m -json all | go-mod-outdated -update -direct
-	go list -json -m all | nancy sleuth
+	govulncheck -test ./...
 	goweight | head -n 20

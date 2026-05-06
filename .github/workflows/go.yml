@@ -63,11 +63,8 @@ jobs:
         with:
           go-version: "1.26.x"
 
-      - name: WriteGoList
-        run: go list -json -m all > go.list
-
-      - name: Nancy
-        uses: sonatype-nexus-community/nancy-github-action@main
+      - name: Govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest -test ./...
 
   lint:
     runs-on: ubuntu-latest
