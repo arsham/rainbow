@@ -6,7 +6,6 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"testing"
@@ -18,30 +17,30 @@ import (
 
 var re = regexp.MustCompile(`\x1B\[[0-9;]*[JKmsu]`)
 
-func setup(t *testing.T) func() {
+const binaryName = "rainbow"
+
+func setup(t *testing.T) {
 	t.Helper()
 	oldStdin := os.Stdin
 	oldStdout := os.Stdout
 	oldArgs := os.Args
 
-	fin, err := ioutil.TempFile("", "testMain")
+	fin, err := os.CreateTemp(t.TempDir(), "testMain")
 	require.NoError(t, err)
-	fout, err := ioutil.TempFile("", "testMain")
-	if err != nil {
-		assert.NoError(t, fin.Close())
-		t.Fatal(err)
-	}
 	os.Stdin = fin
-	os.Stdout = fout
-	return func() {
+	t.Cleanup(func() {
 		os.Stdin = oldStdin
+		assert.NoError(t, fin.Close())
+	})
+
+	fout, err := os.CreateTemp(t.TempDir(), "testMain")
+	require.NoError(t, err)
+	os.Stdout = fout
+	t.Cleanup(func() {
 		os.Stdout = oldStdout
 		os.Args = oldArgs
-		assert.NoError(t, fin.Close())
 		assert.NoError(t, fout.Close())
-		assert.NoError(t, os.Remove(fin.Name()))
-		assert.NoError(t, os.Remove(fout.Name()))
-	}
+	})
 }
 
 func TestMain(t *testing.T) {
@@ -51,10 +50,9 @@ func TestMain(t *testing.T) {
 }
 
 func testMainWithArgs(t *testing.T) {
-	cleanup := setup(t)
-	defer cleanup()
+	setup(t)
 	input := gofakeit.Sentence(20)
-	os.Args = []string{"rainbow", input}
+	os.Args = []string{binaryName, input}
 	main()
 	os.Stdout.Seek(0, 0)
 	buf := &bytes.Buffer{}
@@ -66,10 +64,9 @@ func testMainWithArgs(t *testing.T) {
 }
 
 func testMainWithPipe(t *testing.T) {
-	cleanup := setup(t)
-	defer cleanup()
+	setup(t)
 	input := gofakeit.Sentence(20)
-	os.Args = []string{"rainbow"}
+	os.Args = []string{binaryName}
 	os.Stdin.WriteString(input)
 	os.Stdin.Seek(0, 0)
 	main()
@@ -83,14 +80,13 @@ func testMainWithPipe(t *testing.T) {
 }
 
 func testMainCopyError(t *testing.T) {
-	cleanup := setup(t)
-	defer cleanup()
-	fin, err := ioutil.TempFile("", "testMain")
+	setup(t)
+	fin, err := os.CreateTemp("", "testMain")
 	require.NoError(t, err)
 	require.NoError(t, fin.Close())
 	os.Stdin = fin
 
-	os.Args = []string{"rainbow"}
+	os.Args = []string{binaryName}
 	main()
 	os.Stdout.Seek(0, 0)
 	buf := &bytes.Buffer{}

@@ -2,22 +2,21 @@
 // Use of this source code is governed by the Apache 2.0 license
 // License that can be found in the LICENSE file.
 
+// Package main is the entrypoint to the rainbow binary.
 package main
 
 import (
 	"bytes"
 	"fmt"
 	"io"
-	"math/rand"
+	"math/rand/v2"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/arsham/rainbow/rainbow"
 )
 
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
 	var r io.Reader
 	switch len(os.Args) {
 	case 1:
@@ -27,7 +26,7 @@ func main() {
 	}
 	l := &rainbow.Light{
 		Writer: os.Stdout,
-		Seed:   rand.Int63n(256),
+		Seed:   rand.Int64N(256),
 	}
 
 	if _, err := io.Copy(l, r); err != nil {

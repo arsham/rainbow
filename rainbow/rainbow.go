@@ -2,30 +2,35 @@
 // Use of this source code is governed by the Apache 2.0 license
 // License that can be found in the LICENSE file.
 
-// Package rainbow prints texts in beautiful rainbows in terminal. Usage is very
-// simple:
-//
-//   import "github.com/arsham/rainbow/rainbow"
-//   // ...
-//   l := rainbow.Light{
-//       Reader: someReader, // to read from
-//       Writer: os.Stdout, // to write to
-//   }
-//   l.Paint() // will rainbow everything it reads from reader to writer.
-//
-// If you want the rainbow to be random, you can seed it this way:
-//   l := rainbow.Light{
-//       Reader: buf,
-//       Writer: os.Stdout,
-//       Seed:   rand.Int63n(256),
-//   }
-//
-// You can also use the Light as a Writer:
-//   l := rainbow.Light{
-//       Writer: os.Stdout, // to write to
-//       Seed:   rand.Int63n(256),
-//   }
-//   io.Copy(l, someReader)
+/*
+Package rainbow prints texts in beautiful rainbows in terminal. Usage is very
+
+simple:
+
+	import "github.com/arsham/rainbow/rainbow"
+	// ...
+	l := rainbow.Light{
+	    Reader: someReader, // to read from
+	    Writer: os.Stdout, // to write to
+	}
+	l.Paint() // will rainbow everything it reads from reader to writer.
+
+If you want the rainbow to be random, you can seed it this way:
+
+	l := rainbow.Light{
+	    Reader: buf,
+	    Writer: os.Stdout,
+	    Seed:   rand.Int63n(256),
+	}
+
+You can also use the Light as a Writer:
+
+	l := rainbow.Light{
+	    Writer: os.Stdout, // to write to
+	    Seed:   rand.Int63n(256),
+	}
+	io.Copy(l, someReader)
+*/
 package rainbow
 
 import (
@@ -33,7 +38,7 @@ import (
 	"errors"
 	"io"
 	"math"
-	"math/rand"
+	"math/rand/v2"
 	"regexp"
 	"strconv"
 )
@@ -62,7 +67,7 @@ type Light struct {
 // Paint returns an error if it could not copy the data.
 func (l *Light) Paint() error {
 	if l.Seed == 0 {
-		l.Seed = rand.Int63n(256)
+		l.Seed = rand.Int64N(256)
 	}
 	_, err := io.Copy(l, l.Reader)
 	return err
@@ -108,14 +113,14 @@ func plotPos(x float64) (red, green, blue float64) {
 	return red, green, blue
 }
 
-const max = 16 + (6 * (127 + 128) / 256 * 36) + (6 * (127 + 128) / 256 * 6) + (6 * (127 + 128) / 256)
+const maxColour = 16 + (6 * (127 + 128) / 256 * 36) + (6 * (127 + 128) / 256 * 6) + (6 * (127 + 128) / 256)
 
 // nums is used to cache the values of strconv.Itoa(n) for better performance
 // gains.
-var nums = make([]string, 0, max)
+var nums = make([]string, 0, maxColour)
 
 func init() {
-	for i := int64(0); i < max; i++ {
+	for i := int64(0); i < maxColour; i++ {
 		nums = append(nums, strconv.FormatInt(i, 10))
 	}
 }
