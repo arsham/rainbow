@@ -34,14 +34,13 @@ ci_tests: ## Run tests for CI.
 	go test -trimpath --timeout=5m -failfast -v -race -covermode=atomic -coverprofile=coverage.out ./...
 
 .PHONY: dependencies
-dependencies: ## Install dependencies requried for development operations.
+dependencies: ## Install dependencies required for development operations.
 	@go install github.com/cespare/reflex@latest
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	@go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 	@go install github.com/psampaz/go-mod-outdated@latest
 	@go install github.com/jondot/goweight@latest
-	@go get -t -u golang.org/x/tools/cmd/cover
-	@go get -t -u github.com/sonatype-nexus-community/nancy@latest
-	@go get -u ./...
+	@go install github.com/sonatype-nexus-community/nancy@latest
+	@go get -t -u ./...
 	@go mod tidy
 
 .PHONY: clean

@@ -47,8 +47,8 @@ linters:
             - $all
           allow:
             - $gostd
-            - github.com/arsham/rainbow
-            - github.com/brianvoe/gofakeit/v5
+            - github.com/arsham/rainbow/v2
+            - github.com/brianvoe/gofakeit/v7
             - github.com/stretchr/testify
     cyclop:
       max-complexity: 30
@@ -146,7 +146,7 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/arsham/rainbow
+        - github.com/arsham/rainbow/v2
   exclusions:
     generated: lax
     paths:

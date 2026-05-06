@@ -1,11 +1,11 @@
 # Rainbow
 
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/arsham/rainbow)](https://pkg.go.dev/github.com/arsham/rainbow)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/arsham/rainbow/v2)](https://pkg.go.dev/github.com/arsham/rainbow/v2)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/arsham/rainbow)
 [![Build Status](https://github.com/arsham/rainbow/actions/workflows/go.yml/badge.svg)](https://github.com/arsham/rainbow/actions/workflows/go.yml)
 [![Coverage Status](https://codecov.io/gh/arsham/rainbow/branch/master/graph/badge.svg)](https://codecov.io/gh/arsham/rainbow)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9d181f84a8ab4ab3a07201e37d9a218b)](https://www.codacy.com/app/arsham/rainbow?utm_source=github.com&utm_medium=referral&utm_content=arsham/rainbow&utm_campaign=Badge_Grade)
-[![Go Report Card](https://goreportcard.com/badge/github.com/arsham/rainbow)](https://goreportcard.com/report/github.com/arsham/rainbow)
+[![Go Report Card](https://goreportcard.com/badge/github.com/arsham/rainbow/v2)](https://goreportcard.com/report/github.com/arsham/rainbow/v2)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Tasty rainbows for your terminal like these:
@@ -29,8 +29,10 @@ You can download the latest binary from
 source:
 
 ```bash
-go install github.com/arsham/rainbow@latest
+go install github.com/arsham/rainbow/v2@latest
 ```
+
+If you need support for Go versions before Go 1.26, use the v1 module instead.
 
 ## Usage
 
@@ -60,7 +62,7 @@ ls -l | rainbow
 `Light` struct implements io.Reader and io.Writer:
 
 ```go
-import "github.com/arsham/rainbow/rainbow"
+import "github.com/arsham/rainbow/v2/rainbow"
 // ...
 l := rainbow.Light{
     Reader: someReader, // to read from
@@ -75,7 +77,7 @@ If you want the rainbow to be random, you can seed it this way:
 l := rainbow.Light{
     Reader: buf,
     Writer: os.Stdout,
-    Seed:   rand.Int63n(256),
+    Seed:   rand.Int64N(256),
 }
 ```
 
@@ -84,7 +86,7 @@ Or if you prefer io.Copy:
 ```go
 l := rainbow.Light{
     Writer: os.Stdout,
-    Seed:   rand.Int63n(256),
+    Seed:   rand.Int64N(256),
 }
 io.Copy(l, someReader)
 ```

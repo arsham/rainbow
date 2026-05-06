@@ -7,7 +7,7 @@ Package rainbow prints texts in beautiful rainbows in terminal. Usage is very
 
 simple:
 
-	import "github.com/arsham/rainbow/rainbow"
+	import "github.com/arsham/rainbow/v2/rainbow"
 	// ...
 	l := rainbow.Light{
 	    Reader: someReader, // to read from
@@ -20,14 +20,14 @@ If you want the rainbow to be random, you can seed it this way:
 	l := rainbow.Light{
 	    Reader: buf,
 	    Writer: os.Stdout,
-	    Seed:   rand.Int63n(256),
+	    Seed:   rand.Int64N(256),
 	}
 
 You can also use the Light as a Writer:
 
 	l := rainbow.Light{
 	    Writer: os.Stdout, // to write to
-	    Seed:   rand.Int63n(256),
+	    Seed:   rand.Int64N(256),
 	}
 	io.Copy(l, someReader)
 */

@@ -13,7 +13,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/arsham/rainbow/rainbow"
+	"github.com/arsham/rainbow/v2/rainbow"
 )
 
 func main() {
