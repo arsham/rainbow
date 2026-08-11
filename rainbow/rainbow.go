@@ -45,7 +45,7 @@ import (
 
 var (
 	// We remove all previous paintings to create a new rainbow.
-	colorMatch = regexp.MustCompile("^\033" + `\[\d+(;\d+)?(;\d+)?[mK]`)
+	colorMatch = regexp.MustCompile(`\033\[[0-9;]*[mK]`)
 
 	// ErrNilWriter is returned when Light.Writer is nil.
 	ErrNilWriter = errors.New("nil writer")
@@ -87,7 +87,24 @@ func (l *Light) Write(data []byte) (int, error) {
 	)
 
 	data = colorMatch.ReplaceAll(data, []byte(""))
-	for _, c := range string(data) {
+	for i, c := range string(data) {
+		if c == '\033' {
+			seq := data[i:]
+			j := 1
+			if j < len(seq) && seq[j] == '[' {
+				for j++; j < len(seq); j++ {
+					if (seq[j] >= 'A' && seq[j] <= 'Z') || (seq[j] >= 'a' && seq[j] <= 'z') {
+						j++
+						break
+					}
+				}
+			} else if j < len(seq) && (seq[j] == ']' || seq[j] == 'P' || seq[j] == 'X' || seq[j] == '^') {
+				for j++; j < len(seq) && seq[j] != 0x1b && seq[j] != 0x07; j++ {
+				}
+			}
+			buf.Write(seq[:j])
+			continue
+		}
 		switch c {
 		case '\n':
 			offset = 0
